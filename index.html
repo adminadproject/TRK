@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tempah Sekarang — Order Form</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0A0A0A;
+    --paper:#F6F2EA;
+    --paper-raised:#FFFFFF;
+    --ink:#211F1C;
+    --ink-soft:#5B5750;
+    --indigo:#C8102E;
+    --indigo-deep:#8E0B20;
+    --mustard:#F5F2EA;
+    --mustard-deep:#C9C5BC;
+    --line:#DAD3C3;
+    --success:#2E7D32;
+    --danger:#C8102E;
+    --radius:14px;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+
+  /* ---------- Background texture: faint diagonal weave ---------- */
+  body{
+    background-image:
+      repeating-linear-gradient(135deg, rgba(200,16,46,0.05) 0px, rgba(200,16,46,0.05) 1px, transparent 1px, transparent 14px);
+  }
+
+  .wrap{
+    max-width:560px;
+    margin:0 auto;
+    padding:32px 20px 80px;
+  }
+  @media (min-width:900px){
+    .wrap{ max-width:640px; padding:48px 24px 100px; }
+  }
+
+  /* ---------- Poster images ---------- */
+  .poster{
+    display:block;
+    width:100%;
+    height:auto;
+    border-radius:10px;
+    margin-bottom:18px;
+    border:2px solid var(--mustard);
+    box-shadow:0 8px 30px rgba(0,0,0,0.5);
+  }
+
+  /* ---------- Hero ---------- */
+  .hero{
+    text-align:center;
+    padding:18px 0 28px;
+  }
+  .hero .eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    letter-spacing:0.18em;
+    text-transform:uppercase;
+    color:var(--mustard);
+    font-weight:600;
+  }
+  .hero h1{
+    font-family:'Black Ops One',sans-serif;
+    font-weight:400;
+    font-size:clamp(28px,7.5vw,46px);
+    margin:10px 0 10px;
+    color:var(--mustard);
+    text-shadow:2px 2px 0 var(--indigo-deep), 0 0 22px rgba(200,16,46,0.35);
+    letter-spacing:0.02em;
+    line-height:1.25;
+    text-transform:uppercase;
+  }
+  .hero p{
+    color:#D8D5CE;
+    font-size:14.5px;
+    margin:0;
+    line-height:1.5;
+  }
+
+  /* ---------- Card shell ---------- */
+  .card{
+    background:var(--paper-raised);
+    border-radius:var(--radius);
+    border:1px solid var(--line);
+    padding:24px 22px;
+    box-shadow:0 1px 2px rgba(33,31,28,0.04), 0 8px 24px rgba(33,31,28,0.05);
+  }
+
+  .section-label{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    margin:0 0 12px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .section-label::after{
+    content:"";
+    flex:1;
+    height:1px;
+    background:var(--line);
+  }
+
+  /* ---------- Inputs ---------- */
+  label{
+    display:block;
+    font-size:13px;
+    font-weight:600;
+    color:var(--ink);
+    margin-bottom:6px;
+  }
+  input[type=text], input[type=tel], select, input[type=number]{
+    width:100%;
+    font-family:'Inter',sans-serif;
+    font-size:15px;
+    padding:11px 12px;
+    border:1.5px solid var(--line);
+    border-radius:9px;
+    background:var(--paper);
+    color:var(--ink);
+    outline:none;
+    transition:border-color .15s ease, background .15s ease;
+  }
+  input[type=text]:focus, input[type=tel]:focus, select:focus, input[type=number]:focus{
+    border-color:var(--indigo);
+    background:#fff;
+  }
+  .field{ margin-bottom:14px; }
+  .row2{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+  }
+
+  /* ---------- Garment tag (signature element) ---------- */
+  #items{
+    display:flex;
+    flex-direction:column;
+    gap:22px;
+    margin-bottom:6px;
+  }
+  .tag{
+    position:relative;
+    background:var(--paper);
+    border:1.5px solid var(--line);
+    border-radius:10px 10px 4px 4px;
+    padding:16px 16px 18px;
+  }
+  .tag::after{
+    content:"";
+    position:absolute;
+    left:0; right:0; bottom:-9px;
+    height:10px;
+    background:
+      linear-gradient(135deg, var(--paper-raised) 50%, transparent 50%) 0 0/14px 14px,
+      linear-gradient(-135deg, var(--paper-raised) 50%, transparent 50%) 0 0/14px 14px;
+    background-color:var(--paper);
+    background-position: bottom left, bottom left;
+  }
+  .tag-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:12px;
+  }
+  .tag-num{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    color:var(--ink-soft);
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .tag-num .hole{
+    width:10px;height:10px;
+    border-radius:50%;
+    background:var(--paper-raised);
+    border:1.5px solid var(--line);
+    display:inline-block;
+  }
+  .remove-btn{
+    border:none;
+    background:none;
+    color:var(--danger);
+    font-size:12px;
+    font-weight:600;
+    font-family:'Inter',sans-serif;
+    cursor:pointer;
+    padding:4px 6px;
+    border-radius:6px;
+  }
+  .remove-btn:hover{ background:rgba(200,16,46,0.12); }
+
+  .tag-grid{
+    display:grid;
+    grid-template-columns:1.1fr 0.8fr 0.7fr;
+    gap:10px;
+  }
+  @media (max-width:420px){
+    .tag-grid{ grid-template-columns:1fr; }
+  }
+  .tag-grid label{ font-size:11.5px; color:var(--ink-soft); font-weight:600; text-transform:uppercase; letter-spacing:0.04em; margin-bottom:5px;}
+
+  .add-btn{
+    width:100%;
+    margin-top:14px;
+    padding:12px;
+    border:1.5px dashed var(--indigo);
+    border-radius:10px;
+    background:transparent;
+    color:var(--indigo);
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    font-size:14px;
+    cursor:pointer;
+    transition:background .15s ease;
+  }
+  .add-btn:hover{ background:rgba(200,16,46,0.08); }
+
+  /* ---------- Submit ---------- */
+  .submit-btn{
+    width:100%;
+    margin-top:22px;
+    padding:15px;
+    border:none;
+    border-radius:10px;
+    background:var(--indigo);
+    color:#fff;
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:16px;
+    letter-spacing:0.01em;
+    cursor:pointer;
+    transition:background .15s ease, transform .1s ease;
+  }
+  .submit-btn:hover{ background:var(--indigo-deep); }
+  .submit-btn:active{ transform:scale(0.99); }
+  .submit-btn:disabled{ opacity:0.6; cursor:not-allowed; }
+
+  .status{
+    margin-top:14px;
+    font-size:14px;
+    text-align:center;
+    display:none;
+    border-radius:10px;
+    padding:12px 14px;
+  }
+  .status.show{ display:block; }
+  .status.success{ background:rgba(46,125,50,0.14); color:#5FCB66; }
+  .status.error{ background:rgba(200,16,46,0.14); color:#FF6B7A; }
+  .status.loading{ background:rgba(245,242,234,0.12); color:var(--ink); }
+
+  .order-id{
+    font-family:'IBM Plex Mono',monospace;
+    font-weight:600;
+  }
+
+  footer{
+    text-align:center;
+    margin-top:26px;
+    font-size:12px;
+    color:#8C887F;
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">Borang Tempahan</div>
+    <h1>HELLO TRKIAN!</h1>
+    <p>Isi maklumat di bawah untuk tempah jersi TRK On Tour. Boleh tambah lebih daripada satu jenis dan saiz dalam tempahan yang sama.</p>
+  </div>
+
+  <div class="posters">
+    <img class="poster" src="https://raw.githubusercontent.com/adminadproject/TRK/refs/heads/main/POSTER%20TRK.png" alt="Poster TRK On Tour - Jersi Retro Collar">
+    <img class="poster" src="https://raw.githubusercontent.com/adminadproject/TRK/refs/heads/main/UKURAN%20BAJU.png" alt="Carta Saiz Baju">
+  </div>
+
+  <div class="card">
+
+    <p class="section-label">Maklumat Pelanggan</p>
+    <div class="field">
+      <label for="nama">Nama Penuh</label>
+      <input type="text" id="nama" placeholder="Contoh: Ahmad Bin Ali" required>
+    </div>
+    <div class="field" style="margin-bottom:22px;">
+      <label for="telefon">No. Telefon</label>
+      <input type="tel" id="telefon" placeholder="Contoh: 012-3456789" required>
+    </div>
+
+    <p class="section-label">Pesanan Tempahan</p>
+    <div id="items"></div>
+
+    <button type="button" class="add-btn" id="addItemBtn">+ Tambah Pesanan Lain</button>
+
+    <button type="button" class="submit-btn" id="submitBtn">Hantar Order</button>
+
+    <div class="status" id="status"></div>
+
+  </div>
+
+  <footer>Maklumat akan dihantar terus ke sistem tempahan kami.</footer>
+
+</div>
+
+<script>
+  // ============================================================
+  // KONFIGURASI — tukar URL ini kepada URL Web App Google Apps Script anda
+  // ============================================================
+  const GOOGLE_SHEET_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbyIS1d5O2p5xXMvgjA2GOcNWPRxdwDCfJjHOlhSOVpVh2qWfwYpu7S_JutrEInaDrg2/exec";
+
+  // Tukar senarai ini ikut produk sebenar kedai anda
+  const JENIS_OPTIONS = ["ROUNDNECK", "RETRO", "ROUNDNECK LP", "RETRO LP", "MUSLIMAH"];
+  const SAIZ_OPTIONS = ["XS", "S", "M", "L", "XL", "XXL", "3XL", "4XL", "5XL", "6XL", "7XL", "8XL", "9XL", "K28", "K30", "K32", "K34", "K36", "K38"];
+
+  let itemCount = 0;
+
+  function createItemRow() {
+    itemCount++;
+    const id = itemCount;
+    const div = document.createElement("div");
+    div.className = "tag";
+    div.dataset.id = id;
+
+    div.innerHTML = `
+      <div class="tag-head">
+        <span class="tag-num"><span class="hole"></span> Pesanan ${String(id).padStart(2,"0")}</span>
+        <button type="button" class="remove-btn" data-remove="${id}">Buang</button>
+      </div>
+      <div class="tag-grid">
+        <div>
+          <label>Jenis</label>
+          <select class="f-jenis">
+            ${JENIS_OPTIONS.map(j => `<option value="${j}">${j}</option>`).join("")}
+          </select>
+        </div>
+        <div>
+          <label>Saiz</label>
+          <select class="f-saiz">
+            ${SAIZ_OPTIONS.map(s => `<option value="${s}">${s}</option>`).join("")}
+          </select>
+        </div>
+        <div>
+          <label>Kuantiti</label>
+          <input type="number" class="f-kuantiti" min="1" value="1">
+        </div>
+      </div>
+    `;
+    return div;
+  }
+
+  const itemsContainer = document.getElementById("items");
+
+  function addItem() {
+    const row = createItemRow();
+    itemsContainer.appendChild(row);
+    refreshRemoveButtons();
+  }
+
+  function refreshRemoveButtons() {
+    const rows = itemsContainer.querySelectorAll(".tag");
+    rows.forEach(row => {
+      const btn = row.querySelector(".remove-btn");
+      btn.style.visibility = rows.length > 1 ? "visible" : "hidden";
+    });
+  }
+
+  itemsContainer.addEventListener("click", (e) => {
+    if (e.target.matches("[data-remove]")) {
+      const id = e.target.getAttribute("data-remove");
+      const row = itemsContainer.querySelector(`.tag[data-id="${id}"]`);
+      if (row) row.remove();
+      refreshRemoveButtons();
+    }
+  });
+
+  document.getElementById("addItemBtn").addEventListener("click", addItem);
+
+  // Mula dengan satu item
+  addItem();
+
+  // ---------------- Submit ----------------
+  const statusEl = document.getElementById("status");
+  const submitBtn = document.getElementById("submitBtn");
+
+  function setStatus(type, html) {
+    statusEl.className = "status show " + type;
+    statusEl.innerHTML = html;
+  }
+
+  document.getElementById("submitBtn").addEventListener("click", async () => {
+    const nama = document.getElementById("nama").value.trim();
+    const telefon = document.getElementById("telefon").value.trim();
+
+    if (!nama || !telefon) {
+      setStatus("error", "Sila isi nama dan no. telefon.");
+      return;
+    }
+
+    const rows = itemsContainer.querySelectorAll(".tag");
+    const items = Array.from(rows).map(row => ({
+      jenis: row.querySelector(".f-jenis").value,
+      saiz: row.querySelector(".f-saiz").value,
+      kuantiti: parseInt(row.querySelector(".f-kuantiti").value, 10) || 1
+    }));
+
+    if (items.length === 0) {
+      setStatus("error", "Sila tambah sekurang-kurangnya satu pesanan.");
+      return;
+    }
+
+    // Kembangkan setiap item ikut kuantiti - 1 row dalam sheet = 1 helai/seluar
+    const rowsToSend = [];
+    items.forEach(item => {
+      for (let i = 0; i < item.kuantiti; i++) {
+        rowsToSend.push({ jenis: item.jenis, saiz: item.saiz });
+      }
+    });
+
+    const orderId = Date.now().toString(36).toUpperCase();
+    const payload = { orderId, nama, telefon, rows: rowsToSend };
+
+    submitBtn.disabled = true;
+    setStatus("loading", "Menghantar order anda...");
+
+    try {
+      if (!GOOGLE_SHEET_WEBAPP_URL || GOOGLE_SHEET_WEBAPP_URL.indexOf("http") !== 0) {
+        throw new Error("URL Google Sheet belum dikonfigurasi.");
+      }
+
+      await fetch(GOOGLE_SHEET_WEBAPP_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload)
+      });
+
+      const totalHelai = rowsToSend.length;
+      setStatus("success", `Order anda telah diterima (${totalHelai} helai).<br>No. Rujukan: <span class="order-id">${orderId}</span>`);
+
+      // Reset borang
+      document.getElementById("nama").value = "";
+      document.getElementById("telefon").value = "";
+      itemsContainer.innerHTML = "";
+      itemCount = 0;
+      addItem();
+
+    } catch (err) {
+      setStatus("error", "Maaf, order gagal dihantar. Sila cuba lagi atau hubungi kami terus.");
+      console.error(err);
+    } finally {
+      submitBtn.disabled = false;
+    }
+  });
+</script>
+
+</body>
+</html>
