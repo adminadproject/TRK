@@ -678,6 +678,16 @@
     }));
   }
 
+  /* ---- GENERATE NO RUJUKAN ---- */
+  function generateOrderId(telefon) {
+    const huruf = "ABCDEFGHJKLMNPQRSTUVWXYZ"; // buang I dan O untuk elak keliru
+    const rawak = huruf[Math.floor(Math.random()*huruf.length)] +
+                  huruf[Math.floor(Math.random()*huruf.length)];
+    const digits = telefon.replace(/\D/g,"");
+    const empat = digits.slice(-4);
+    return rawak + empat;
+  }
+
   /* ---- SUBMIT ORDER BARU ---- */
   document.getElementById("submitBtn").addEventListener("click", async()=>{
     const nama   = document.getElementById("nama").value.trim();
@@ -690,7 +700,7 @@
     const rowsToSend=[];
     items.forEach(item=>{ for(let i=0;i<item.kuantiti;i++) rowsToSend.push({jenis:item.jenis,saiz:item.saiz}); });
 
-    const orderId = Date.now().toString(36).toUpperCase();
+    const orderId = generateOrderId(telefon);
     document.getElementById("submitBtn").disabled=true;
     setStatus("statusOrder","loading","Menghantar order...");
 
