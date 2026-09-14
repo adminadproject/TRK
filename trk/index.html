@@ -498,6 +498,9 @@
             <span class="rt-val" id="resultTotal">0</span>
           </div>
           <button class="edit-btn" id="editBtn" onclick="muatEditOrder()">✏️ Edit Order Ini</button>
+          <div id="editBlockMsg" style="display:none;background:rgba(46,125,50,0.1);border:1px solid rgba(46,125,50,0.25);border-radius:9px;padding:12px 14px;text-align:center;font-size:13px;color:#6FCB74;line-height:1.5;">
+            ✅ Order ini telah dibayar.<br>Sila hubungi admin untuk sebarang perubahan.
+          </div>
         </div>
       </div>
     </div>
@@ -752,8 +755,14 @@
       const status = data.status || "PENDING BAYARAN";
       if(status === "TELAH BAYAR"){
         statusEl.innerHTML = `<span style="background:rgba(46,125,50,0.2);color:#6FCB74;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700;">✅ TELAH BAYAR</span>`;
+        // Sekat butang edit
+        document.getElementById("editBtn").style.display = "none";
+        document.getElementById("editBlockMsg").style.display = "block";
       } else {
         statusEl.innerHTML = `<span style="background:rgba(200,16,46,0.15);color:#FF7A7A;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700;">⏳ PENDING BAYARAN</span>`;
+        // Benarkan edit
+        document.getElementById("editBtn").style.display = "block";
+        document.getElementById("editBlockMsg").style.display = "none";
       }
 
       const itemsEl = document.getElementById("resultItems");
@@ -858,7 +867,8 @@
           <div class="mi-num">${i+1}</div>
           <div class="mi-info">
             <div class="mi-jenis">${item.jenis}</div>
-            <div class="mi-saiz">Saiz: ${item.saiz} • RM${hargaSehelai}/helai</div>
+            <div class="mi-saiz">Saiz: ${item.saiz} • <b>x${item.kuantiti} helai</b></div>
+            <div class="mi-saiz" style="color:var(--ink-soft);">RM${hargaSehelai}/helai</div>
           </div>
           <div class="mi-qty">RM${hargaItem}</div>
         </div>`;
