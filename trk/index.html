@@ -547,12 +547,7 @@
       <div class="mh-time" id="modalTime"></div>
     </div>
     <div class="modal-body">
-      <div class="modal-ref">
-        <div class="mr-label">No. Rujukan — Simpan untuk rujukan</div>
-        <div class="mr-num" id="modalRef">—</div>
-      </div>
       <div class="modal-info">
-        <div class="modal-info-row"><span class="mil">No. Rujukan</span><span class="miv" id="modalRefInfo" style="font-family:'IBM Plex Mono',monospace;color:var(--red);letter-spacing:0.06em;">—</span></div>
         <div class="modal-info-row"><span class="mil">Nama</span><span class="miv" id="modalNama">—</span></div>
         <div class="modal-info-row"><span class="mil">No. Telefon</span><span class="miv" id="modalTel">—</span></div>
       </div>
@@ -567,6 +562,11 @@
         <div class="mh-val" id="modalHarga">RM0</div>
       </div>
       <div class="modal-bayaran" id="modalBayaranMsg"></div>
+      <div class="modal-ref" style="margin-top:14px;">
+        <div class="mr-label">No. Rujukan — Simpan untuk rujukan</div>
+        <div class="mr-num" id="modalRef">—</div>
+        <div id="modalRefInfo" style="display:none;"></div>
+      </div>
       <button class="modal-simpan" onclick="simpanResit()">💾 Simpan Resit</button>
       <button class="modal-close" onclick="tutupModal()">Tutup</button>
     </div>
