@@ -780,6 +780,8 @@
         "Terima kasih."
       );
       document.getElementById("waBtn").href = "https://wa.me/60106552627?text=" + waMsg;
+
+      const itemsEl = document.getElementById("resultItems");
       itemsEl.innerHTML="";
       let total=0;
       data.items.forEach(item=>{
