@@ -23,7 +23,7 @@
   }
 
   *{box-sizing:border-box;margin:0;padding:0;}
-  html{scroll-behavior:smooth;}
+  html{}
   body{
     background:var(--bg);
     color:var(--ink);
@@ -537,7 +537,6 @@
   function showView(id){
     document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
     document.getElementById(id).classList.add('active');
-    window.scrollTo({top:0,behavior:'smooth'});
   }
 
   /* ---- NORMALIZE PHONE ---- */
