@@ -487,6 +487,10 @@
             <span class="rl">No. Telefon</span>
             <span class="rv" id="resultTelefon">—</span>
           </div>
+          <div class="result-info-row">
+            <span class="rl">Status</span>
+            <span class="rv" id="resultStatus">—</span>
+          </div>
           <div class="result-items-title">Senarai Pesanan</div>
           <div id="resultItems"></div>
           <div class="result-total">
@@ -732,6 +736,15 @@
       document.getElementById("resultRef").textContent    = data.orderId;
       document.getElementById("resultNama").textContent   = data.nama;
       document.getElementById("resultTelefon").textContent= data.telefon;
+
+      // Papar status dengan warna
+      const statusEl = document.getElementById("resultStatus");
+      const status = data.status || "PENDING BAYARAN";
+      if(status === "TELAH BAYAR"){
+        statusEl.innerHTML = `<span style="background:rgba(46,125,50,0.2);color:#6FCB74;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700;">✅ TELAH BAYAR</span>`;
+      } else {
+        statusEl.innerHTML = `<span style="background:rgba(200,16,46,0.15);color:#FF7A7A;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700;">⏳ PENDING BAYARAN</span>`;
+      }
 
       const itemsEl = document.getElementById("resultItems");
       itemsEl.innerHTML="";
