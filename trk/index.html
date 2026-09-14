@@ -364,11 +364,44 @@
   }
   .modal-close{
     width:100%;padding:13px;border:none;border-radius:10px;
+    background:var(--surface2);color:var(--ink-soft);
+    font-family:'Space Grotesk',sans-serif;font-weight:700;
+    font-size:14px;cursor:pointer;transition:background .15s;
+    margin-top:8px;
+  }
+  .modal-close:hover{background:var(--line2);}
+
+  .modal-harga{
+    background:linear-gradient(135deg,rgba(200,16,46,0.2),rgba(142,11,32,0.15));
+    border:1px solid rgba(200,16,46,0.4);
+    border-radius:10px;padding:14px 16px;
+    display:flex;justify-content:space-between;align-items:center;
+    margin:12px 0;
+  }
+  .modal-harga .mh-label{font-size:13px;font-weight:600;color:var(--ink);}
+  .modal-harga .mh-val{
+    font-family:'Black Ops One',sans-serif;
+    font-size:24px;color:var(--red);
+  }
+
+  .modal-bayaran{
+    background:rgba(255,255,255,0.04);
+    border:1px solid var(--line2);
+    border-radius:10px;padding:12px 14px;
+    font-size:13px;color:var(--ink-soft);
+    line-height:1.6;text-align:center;
+    margin-bottom:14px;
+  }
+  .modal-bayaran strong{color:var(--ink);}
+
+  .modal-simpan{
+    width:100%;padding:13px;border:none;border-radius:10px;
     background:var(--red);color:#fff;
     font-family:'Space Grotesk',sans-serif;font-weight:700;
     font-size:14px;cursor:pointer;transition:background .15s;
+    margin-bottom:0;
   }
-  .modal-close:hover{background:var(--red-deep);}
+  .modal-simpan:hover{background:var(--red-deep);}
 
   footer{text-align:center;margin-top:28px;font-size:12px;color:#5A5650;}
 </style>
@@ -517,6 +550,12 @@
         <div><div class="mt-label">Jumlah Helai</div><div class="mt-sub">Keseluruhan order</div></div>
         <div class="mt-val" id="modalTotal">0</div>
       </div>
+      <div class="modal-harga" id="modalHargaBox">
+        <div class="mh-label">Jumlah Bayaran</div>
+        <div class="mh-val" id="modalHarga">RM0</div>
+      </div>
+      <div class="modal-bayaran" id="modalBayaranMsg"></div>
+      <button class="modal-simpan" onclick="simpanResit()">💾 Simpan Resit</button>
       <button class="modal-close" onclick="tutupModal()">Tutup</button>
     </div>
   </div>
@@ -524,6 +563,23 @@
 
 <script>
   const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwm1GBKlAWcMNqe3BOlKucxzyuMxa4eOlV4MaWVXrwGQK7mfSaGMOESDiu6sgrJSsW3/exec";
+
+  /* ---- KIRA HARGA ---- */
+  function getHarga(jenis, saiz) {
+    const xtra4 = ["4XL","5XL","6XL","7XL"];
+    const xtra8 = ["8XL"];
+    const base = {
+      "ROUNDNECK":25,"RETRO":28,
+      "ROUNDNECK LP":28,"RETRO LP":30,
+      "MUSLIMAH":35
+    };
+    const plus4 = {"ROUNDNECK":5,"RETRO":5,"ROUNDNECK LP":5,"RETRO LP":5,"MUSLIMAH":5};
+    const plus8 = {"ROUNDNECK":7,"RETRO":7,"ROUNDNECK LP":7,"RETRO LP":7,"MUSLIMAH":7};
+    const hargaBase = base[jenis] || 0;
+    if(xtra4.indexOf(saiz) !== -1) return hargaBase + (plus4[jenis] || 0);
+    if(xtra8.indexOf(saiz) !== -1) return hargaBase + (plus8[jenis] || 0);
+    return hargaBase;
+  }
 
   const JENIS_OPTIONS = ["ROUNDNECK","RETRO","ROUNDNECK LP","RETRO LP","MUSLIMAH"];
   const SAIZ_OPTIONS  = ["XS","S","M","L","XL","XXL","3XL","4XL","5XL","6XL","7XL","8XL","K28","K30","K32","K34","K36","K38"];
@@ -768,22 +824,73 @@
     document.querySelector(".mh-icon").textContent = isEdit ? "✏️" : "✅";
 
     const list=document.getElementById("modalItemsList");
-    list.innerHTML=""; let total=0;
+    list.innerHTML=""; let total=0; let totalHarga=0;
     items.forEach((item,i)=>{
       total+=item.kuantiti;
+      const hargaSehelai = getHarga(item.jenis, item.saiz);
+      const hargaItem = hargaSehelai * item.kuantiti;
+      totalHarga += hargaItem;
       list.innerHTML+=`
         <div class="modal-item">
           <div class="mi-num">${i+1}</div>
           <div class="mi-info">
             <div class="mi-jenis">${item.jenis}</div>
-            <div class="mi-saiz">Saiz: ${item.saiz}</div>
+            <div class="mi-saiz">Saiz: ${item.saiz} • RM${hargaSehelai}/helai</div>
           </div>
-          <div class="mi-qty">x${item.kuantiti}</div>
+          <div class="mi-qty">RM${hargaItem}</div>
         </div>`;
     });
     document.getElementById("modalTotal").textContent = total+" helai";
+    document.getElementById("modalHarga").textContent = "RM"+totalHarga;
+
+    // Mesej bayaran (hanya untuk order baru, bukan edit)
+    const bayaranBox = document.getElementById("modalBayaranMsg");
+    if(!isEdit){
+      bayaranBox.style.display="block";
+      bayaranBox.innerHTML = `Sila buat bayaran <strong>RM${totalHarga}</strong> ke akaun atau QR yang telah diberikan. Terima kasih!<br><br>⚠️ Jangan lupa <strong>simpan resit</strong> ini sebagai bukti tempahan anda.`;
+      document.getElementById("modalHargaBox").style.display="flex";
+    } else {
+      bayaranBox.style.display="none";
+      document.getElementById("modalHargaBox").style.display="flex";
+    }
+
     document.getElementById("modalOverlay").classList.add("show");
     document.body.style.overflow="hidden";
+  }
+
+  /* ---- SIMPAN RESIT ---- */
+  async function simpanResit(){
+    const modal = document.querySelector(".modal");
+    const btn = document.querySelector(".modal-simpan");
+    const closeBtn = document.querySelector(".modal-close");
+    btn.textContent = "Menyimpan...";
+    btn.disabled = true;
+    closeBtn.style.display = "none";
+
+    try{
+      const script = document.createElement("script");
+      script.src = "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
+      document.head.appendChild(script);
+      await new Promise(resolve => script.onload = resolve);
+
+      const canvas = await html2canvas(modal, {
+        backgroundColor:"#161412",
+        scale:2,
+        useCORS:true,
+        logging:false
+      });
+
+      const link = document.createElement("a");
+      link.download = "resit-trk-"+document.getElementById("modalRef").textContent+".png";
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    }catch(err){
+      alert("Gagal simpan resit. Sila screenshot secara manual.");
+    }finally{
+      btn.textContent = "💾 Simpan Resit";
+      btn.disabled = false;
+      closeBtn.style.display = "block";
+    }
   }
 
   function tutupModal(){
