@@ -3,507 +3,374 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tempah Sekarang — Order Form</title>
+<title>TRK On Tour — Tempahan Jersi</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#0A0A0A;
-    --paper:#F6F2EA;
-    --paper-raised:#FFFFFF;
-    --ink:#211F1C;
-    --ink-soft:#5B5750;
-    --indigo:#C8102E;
-    --indigo-deep:#8E0B20;
-    --mustard:#F5F2EA;
-    --mustard-deep:#C9C5BC;
-    --line:#DAD3C3;
-    --success:#2E7D32;
-    --danger:#C8102E;
-    --radius:14px;
+    --surface:#161412;
+    --surface2:#1E1B18;
+    --ink:#F0EDE6;
+    --ink-soft:#9A948C;
+    --red:#C8102E;
+    --red-deep:#8E0B20;
+    --red-glow:rgba(200,16,46,0.18);
+    --line:#2A2724;
+    --line2:#332F2A;
+    --white:#FFFFFF;
+    --radius:12px;
   }
 
-  *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
   body{
     background:var(--bg);
     color:var(--ink);
     font-family:'Inter',sans-serif;
     -webkit-font-smoothing:antialiased;
     min-height:100vh;
+    background-image:repeating-linear-gradient(135deg,rgba(200,16,46,0.04) 0,rgba(200,16,46,0.04) 1px,transparent 1px,transparent 16px);
   }
 
-  /* ---------- Background texture: faint diagonal weave ---------- */
-  body{
-    background-image:
-      repeating-linear-gradient(135deg, rgba(200,16,46,0.05) 0px, rgba(200,16,46,0.05) 1px, transparent 1px, transparent 14px);
-  }
+  .wrap{max-width:540px;margin:0 auto;padding:28px 18px 80px;}
+  @media(min-width:860px){.wrap{max-width:600px;padding:44px 24px 100px;}}
 
-  .wrap{
-    max-width:560px;
-    margin:0 auto;
-    padding:32px 20px 80px;
-  }
-  @media (min-width:900px){
-    .wrap{ max-width:640px; padding:48px 24px 100px; }
-  }
-
-  /* ---------- Poster images ---------- */
-  .poster{
-    display:block;
-    width:100%;
-    height:auto;
-    border-radius:10px;
-    margin-bottom:18px;
-    border:2px solid var(--mustard);
-    box-shadow:0 8px 30px rgba(0,0,0,0.5);
-  }
-
-  /* ---------- Hero ---------- */
-  .hero{
-    text-align:center;
-    padding:18px 0 28px;
-  }
+  /* ---- HERO ---- */
+  .hero{text-align:center;padding:14px 0 24px;}
   .hero .eyebrow{
     font-family:'IBM Plex Mono',monospace;
-    font-size:12px;
-    letter-spacing:0.18em;
-    text-transform:uppercase;
-    color:var(--mustard);
-    font-weight:600;
+    font-size:11px;letter-spacing:0.2em;text-transform:uppercase;
+    color:var(--ink-soft);margin-bottom:10px;
   }
   .hero h1{
     font-family:'Black Ops One',sans-serif;
-    font-weight:400;
-    font-size:clamp(28px,7.5vw,46px);
-    margin:10px 0 10px;
-    color:var(--mustard);
-    text-shadow:2px 2px 0 var(--indigo-deep), 0 0 22px rgba(200,16,46,0.35);
-    letter-spacing:0.02em;
-    line-height:1.25;
-    text-transform:uppercase;
+    font-size:clamp(26px,7vw,44px);
+    color:var(--white);
+    text-shadow:2px 2px 0 var(--red-deep),0 0 28px rgba(200,16,46,0.4);
+    letter-spacing:0.02em;line-height:1.2;
   }
-  .hero p{
-    color:#D8D5CE;
-    font-size:14.5px;
-    margin:0;
-    line-height:1.5;
+  .hero p{color:var(--ink-soft);font-size:14px;margin-top:8px;line-height:1.6;}
+
+  /* ---- POSTERS ---- */
+  .posters{display:flex;flex-direction:column;gap:14px;margin-bottom:26px;}
+  .posters img{
+    width:100%;height:auto;display:block;
+    border-radius:10px;
+    border:1px solid var(--line2);
+    box-shadow:0 8px 32px rgba(0,0,0,0.55);
   }
 
-  /* ---------- Card shell ---------- */
-  .card{
-    background:var(--paper-raised);
+  /* ---- GATE (landing pilihan) ---- */
+  .gate{
+    display:grid;grid-template-columns:1fr 1fr;gap:12px;
+    margin-bottom:0;
+  }
+  .gate-btn{
+    border:1.5px solid var(--line2);
     border-radius:var(--radius);
-    border:1px solid var(--line);
-    padding:24px 22px;
-    box-shadow:0 1px 2px rgba(33,31,28,0.04), 0 8px 24px rgba(33,31,28,0.05);
+    background:var(--surface);
+    padding:22px 14px;
+    text-align:center;
+    cursor:pointer;
+    transition:border-color .15s,background .15s,transform .1s;
+    display:flex;flex-direction:column;align-items:center;gap:10px;
   }
+  .gate-btn:hover{border-color:var(--red);background:var(--surface2);}
+  .gate-btn:active{transform:scale(0.98);}
+  .gate-btn .gate-icon{font-size:30px;line-height:1;}
+  .gate-btn .gate-title{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;font-size:15px;color:var(--white);
+  }
+  .gate-btn .gate-sub{font-size:12px;color:var(--ink-soft);line-height:1.4;}
+  .gate-btn.primary{border-color:var(--red);background:rgba(200,16,46,0.08);}
+  .gate-btn.primary:hover{background:rgba(200,16,46,0.15);}
 
-  .section-label{
-    font-family:'IBM Plex Mono',monospace;
-    font-size:11px;
-    letter-spacing:0.14em;
-    text-transform:uppercase;
-    color:var(--ink-soft);
-    margin:0 0 12px;
-    display:flex;
-    align-items:center;
-    gap:8px;
-  }
-  .section-label::after{
-    content:"";
-    flex:1;
-    height:1px;
-    background:var(--line);
-  }
+  /* ---- VIEWS ---- */
+  .view{display:none;}
+  .view.active{display:block;animation:fadeUp .25s ease both;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
 
-  /* ---------- Inputs ---------- */
-  label{
-    display:block;
-    font-size:13px;
-    font-weight:600;
-    color:var(--ink);
-    margin-bottom:6px;
-  }
-  input[type=text], input[type=tel], select, input[type=number]{
-    width:100%;
+  /* ---- BACK LINK ---- */
+  .back-link{
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:13px;color:var(--ink-soft);
+    cursor:pointer;margin-bottom:18px;
+    border:none;background:none;
     font-family:'Inter',sans-serif;
-    font-size:15px;
-    padding:11px 12px;
-    border:1.5px solid var(--line);
-    border-radius:9px;
-    background:var(--paper);
-    color:var(--ink);
-    outline:none;
-    transition:border-color .15s ease, background .15s ease;
+    transition:color .15s;
   }
-  input[type=text]:focus, input[type=tel]:focus, select:focus, input[type=number]:focus{
-    border-color:var(--indigo);
-    background:#fff;
+  .back-link:hover{color:var(--ink);}
+
+  /* ---- CARD ---- */
+  .card{
+    background:var(--surface);
+    border-radius:var(--radius);
+    border:1px solid var(--line2);
+    padding:22px 20px;
+    box-shadow:0 4px 24px rgba(0,0,0,0.3);
   }
-  .field{ margin-bottom:14px; }
-  .row2{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:12px;
+  .card+.card{margin-top:14px;}
+
+  .sec-label{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;
+    color:var(--ink-soft);margin-bottom:12px;
+    display:flex;align-items:center;gap:8px;
+  }
+  .sec-label::after{content:"";flex:1;height:1px;background:var(--line2);}
+
+  /* ---- INPUTS ---- */
+  .field{margin-bottom:14px;}
+  .field label{
+    display:block;font-size:12.5px;font-weight:600;
+    color:var(--ink-soft);margin-bottom:6px;letter-spacing:0.01em;
+  }
+  input[type=text],input[type=tel],select,input[type=number]{
+    width:100%;font-family:'Inter',sans-serif;font-size:14.5px;
+    padding:11px 12px;border:1.5px solid var(--line2);
+    border-radius:9px;background:var(--bg);color:var(--ink);
+    outline:none;transition:border-color .15s;
+    -webkit-appearance:none;appearance:none;
+  }
+  input[type=text]:focus,input[type=tel]:focus,select:focus,input[type=number]:focus{
+    border-color:var(--red);
+  }
+  select{
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239A948C' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 12px center;
+    padding-right:32px;
   }
 
-  /* ---------- Garment tag (signature element) ---------- */
-  #items{
-    display:flex;
-    flex-direction:column;
-    gap:22px;
-    margin-bottom:6px;
-  }
+  /* ---- PESANAN TAG ---- */
+  #items{display:flex;flex-direction:column;gap:16px;margin-bottom:6px;}
   .tag{
-    position:relative;
-    background:var(--paper);
-    border:1.5px solid var(--line);
-    border-radius:10px 10px 4px 4px;
-    padding:16px 16px 18px;
-  }
-  .tag::after{
-    content:"";
-    position:absolute;
-    left:0; right:0; bottom:-9px;
-    height:10px;
-    background:
-      linear-gradient(135deg, var(--paper-raised) 50%, transparent 50%) 0 0/14px 14px,
-      linear-gradient(-135deg, var(--paper-raised) 50%, transparent 50%) 0 0/14px 14px;
-    background-color:var(--paper);
-    background-position: bottom left, bottom left;
+    background:var(--bg);border:1.5px solid var(--line2);
+    border-radius:10px;padding:14px 14px 16px;
   }
   .tag-head{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
+    display:flex;align-items:center;justify-content:space-between;
     margin-bottom:12px;
   }
   .tag-num{
-    font-family:'IBM Plex Mono',monospace;
-    font-size:12px;
-    color:var(--ink-soft);
-    display:flex;
-    align-items:center;
-    gap:6px;
-  }
-  .tag-num .hole{
-    width:10px;height:10px;
-    border-radius:50%;
-    background:var(--paper-raised);
-    border:1.5px solid var(--line);
-    display:inline-block;
+    font-family:'IBM Plex Mono',monospace;font-size:11.5px;
+    color:var(--red);display:flex;align-items:center;gap:6px;
   }
   .remove-btn{
-    border:none;
-    background:none;
-    color:var(--danger);
-    font-size:12px;
-    font-weight:600;
-    font-family:'Inter',sans-serif;
-    cursor:pointer;
-    padding:4px 6px;
-    border-radius:6px;
+    border:none;background:none;color:var(--ink-soft);
+    font-size:12px;font-weight:600;font-family:'Inter',sans-serif;
+    cursor:pointer;padding:3px 8px;border-radius:6px;
+    transition:color .15s,background .15s;
   }
-  .remove-btn:hover{ background:rgba(200,16,46,0.12); }
+  .remove-btn:hover{color:#ff6b7a;background:rgba(200,16,46,0.1);}
+  .tag-grid{display:grid;grid-template-columns:1.2fr 0.8fr 0.65fr;gap:10px;}
+  @media(max-width:400px){.tag-grid{grid-template-columns:1fr;}}
+  .tag-grid .field{margin-bottom:0;}
 
-  .tag-grid{
-    display:grid;
-    grid-template-columns:1.1fr 0.8fr 0.7fr;
-    gap:10px;
-  }
-  @media (max-width:420px){
-    .tag-grid{ grid-template-columns:1fr; }
-  }
-  .tag-grid label{ font-size:11.5px; color:var(--ink-soft); font-weight:600; text-transform:uppercase; letter-spacing:0.04em; margin-bottom:5px;}
-
+  /* ---- BUTANG ---- */
   .add-btn{
-    width:100%;
-    margin-top:14px;
-    padding:12px;
-    border:1.5px dashed var(--indigo);
-    border-radius:10px;
-    background:transparent;
-    color:var(--indigo);
-    font-family:'Inter',sans-serif;
-    font-weight:600;
-    font-size:14px;
-    cursor:pointer;
-    transition:background .15s ease;
+    width:100%;margin-top:14px;padding:11px;
+    border:1.5px dashed var(--red);border-radius:10px;
+    background:transparent;color:var(--red);
+    font-family:'Inter',sans-serif;font-weight:600;font-size:14px;
+    cursor:pointer;transition:background .15s;
   }
-  .add-btn:hover{ background:rgba(200,16,46,0.08); }
+  .add-btn:hover{background:var(--red-glow);}
 
-  /* ---------- Submit ---------- */
   .submit-btn{
-    width:100%;
-    margin-top:22px;
-    padding:15px;
-    border:none;
-    border-radius:10px;
-    background:var(--indigo);
-    color:#fff;
-    font-family:'Space Grotesk',sans-serif;
-    font-weight:700;
-    font-size:16px;
-    letter-spacing:0.01em;
-    cursor:pointer;
-    transition:background .15s ease, transform .1s ease;
+    width:100%;margin-top:18px;padding:14px;border:none;
+    border-radius:10px;background:var(--red);color:#fff;
+    font-family:'Space Grotesk',sans-serif;font-weight:700;
+    font-size:15px;letter-spacing:0.02em;cursor:pointer;
+    transition:background .15s,transform .1s;
   }
-  .submit-btn:hover{ background:var(--indigo-deep); }
-  .submit-btn:active{ transform:scale(0.99); }
-  .submit-btn:disabled{ opacity:0.6; cursor:not-allowed; }
+  .submit-btn:hover{background:var(--red-deep);}
+  .submit-btn:active{transform:scale(0.99);}
+  .submit-btn:disabled{opacity:0.55;cursor:not-allowed;}
 
   .status{
-    margin-top:14px;
-    font-size:14px;
-    text-align:center;
-    display:none;
-    border-radius:10px;
-    padding:12px 14px;
+    margin-top:12px;font-size:13.5px;text-align:center;
+    display:none;border-radius:9px;padding:11px 14px;line-height:1.5;
   }
-  .status.show{ display:block; }
-  .status.success{ background:rgba(46,125,50,0.14); color:#5FCB66; }
-  .status.error{ background:rgba(200,16,46,0.14); color:#FF6B7A; }
-  .status.loading{ background:rgba(245,242,234,0.12); color:var(--ink); }
+  .status.show{display:block;}
+  .status.success{background:rgba(46,125,50,0.14);color:#6FCB74;}
+  .status.error{background:rgba(200,16,46,0.14);color:#FF7A7A;}
+  .status.loading{background:rgba(255,255,255,0.06);color:var(--ink-soft);}
 
-  .order-id{
-    font-family:'IBM Plex Mono',monospace;
-    font-weight:600;
+  /* ---- SEMAK ORDER ---- */
+  .semak-result{
+    margin-top:16px;display:none;
+    animation:fadeUp .25s ease both;
+  }
+  .semak-result.show{display:block;}
+
+  .result-card{
+    background:var(--surface);border:1px solid var(--line2);
+    border-radius:var(--radius);overflow:hidden;
+  }
+  .result-header{
+    background:linear-gradient(135deg,var(--red-deep),#5A0010);
+    padding:16px 18px;
+  }
+  .result-header .rh-label{
+    font-size:10.5px;font-family:'IBM Plex Mono',monospace;
+    letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.6);
+  }
+  .result-header .rh-ref{
+    font-family:'IBM Plex Mono',monospace;font-size:20px;
+    font-weight:600;color:#fff;letter-spacing:0.06em;margin-top:2px;
+  }
+  .result-body{padding:16px 18px;}
+  .result-info-row{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:7px 0;border-bottom:1px solid var(--line);
+  }
+  .result-info-row:last-child{border-bottom:none;}
+  .result-info-row .rl{font-size:12px;color:var(--ink-soft);}
+  .result-info-row .rv{font-size:13px;color:var(--ink);font-weight:600;}
+
+  .result-items-title{
+    font-family:'IBM Plex Mono',monospace;font-size:10.5px;
+    letter-spacing:0.12em;text-transform:uppercase;
+    color:var(--ink-soft);margin:16px 0 8px;
+  }
+  .result-item{
+    display:flex;align-items:center;gap:10px;
+    background:var(--bg);border:1px solid var(--line);
+    border-radius:9px;padding:10px 12px;margin-bottom:8px;
+  }
+  .result-item:last-child{margin-bottom:0;}
+  .ri-dot{
+    width:8px;height:8px;border-radius:50%;
+    background:var(--red);flex-shrink:0;
+  }
+  .ri-info{flex:1;}
+  .ri-jenis{font-size:13px;font-weight:700;color:var(--ink);}
+  .ri-saiz{font-size:11.5px;color:var(--ink-soft);margin-top:1px;}
+  .ri-qty{
+    font-family:'IBM Plex Mono',monospace;font-size:13px;
+    font-weight:600;color:var(--red);
   }
 
-  footer{
-    text-align:center;
-    margin-top:26px;
-    font-size:12px;
-    color:#8C887F;
+  .result-total{
+    display:flex;justify-content:space-between;align-items:center;
+    background:var(--red-glow);border:1px solid rgba(200,16,46,0.25);
+    border-radius:9px;padding:12px 14px;margin-top:14px;
+  }
+  .rt-label{font-size:13px;font-weight:600;color:var(--ink);}
+  .rt-val{
+    font-family:'Black Ops One',sans-serif;
+    font-size:20px;color:var(--red);
   }
 
-  /* ---------- Modal Popup ---------- */
+  .edit-btn{
+    width:100%;margin-top:14px;padding:12px;border:none;
+    border-radius:10px;background:var(--red);color:#fff;
+    font-family:'Space Grotesk',sans-serif;font-weight:700;
+    font-size:14px;cursor:pointer;transition:background .15s;
+  }
+  .edit-btn:hover{background:var(--red-deep);}
+
+  /* ---- MODAL ---- */
   .modal-overlay{
-    display:none;
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,0.85);
-    z-index:1000;
-    align-items:center;
-    justify-content:center;
-    padding:20px;
-    backdrop-filter:blur(4px);
-    -webkit-backdrop-filter:blur(4px);
+    display:none;position:fixed;inset:0;
+    background:rgba(0,0,0,0.88);z-index:1000;
+    align-items:center;justify-content:center;padding:18px;
+    backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);
   }
-  .modal-overlay.show{ display:flex; animation:fadeIn .25s ease; }
-
-  @keyframes fadeIn{
-    from{ opacity:0; }
-    to{ opacity:1; }
-  }
-  @keyframes slideUp{
-    from{ opacity:0; transform:translateY(30px) scale(0.97); }
-    to{ opacity:1; transform:translateY(0) scale(1); }
-  }
-
+  .modal-overlay.show{display:flex;}
   .modal{
-    background:#1A1816;
-    border:1px solid #3A3430;
-    border-radius:18px;
-    width:100%;
-    max-width:420px;
-    max-height:88vh;
-    overflow-y:auto;
-    box-shadow:0 25px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(200,16,46,0.2);
+    background:var(--surface);border:1px solid var(--line2);
+    border-radius:18px;width:100%;max-width:400px;
+    max-height:90vh;overflow-y:auto;
+    box-shadow:0 30px 70px rgba(0,0,0,0.7),0 0 0 1px rgba(200,16,46,0.15);
     animation:slideUp .3s cubic-bezier(0.34,1.56,0.64,1);
   }
-
-  .modal-header{
-    background:linear-gradient(135deg, var(--indigo-deep), #5A0010);
-    border-radius:18px 18px 0 0;
-    padding:22px 22px 18px;
-    text-align:center;
-    position:relative;
+  @keyframes slideUp{
+    from{opacity:0;transform:translateY(28px) scale(0.97);}
+    to{opacity:1;transform:translateY(0) scale(1);}
   }
-  .modal-header .check-icon{
-    font-size:42px;
-    display:block;
-    margin-bottom:8px;
-    animation:popIn .4s cubic-bezier(0.34,1.56,0.64,1) .1s both;
+  .modal-head{
+    background:linear-gradient(135deg,var(--red-deep),#5A0010);
+    border-radius:18px 18px 0 0;padding:22px 20px 18px;text-align:center;
   }
-  @keyframes popIn{
-    from{ transform:scale(0); opacity:0; }
-    to{ transform:scale(1); opacity:1; }
-  }
-  .modal-header h2{
-    font-family:'Black Ops One',sans-serif;
-    font-size:20px;
-    color:#fff;
-    margin:0 0 4px;
+  .modal-head .mh-icon{font-size:38px;display:block;margin-bottom:8px;}
+  .modal-head h2{
+    font-family:'Black Ops One',sans-serif;font-size:19px;color:#fff;
     letter-spacing:0.02em;
   }
-  .modal-header p{
-    font-size:12px;
-    color:rgba(255,255,255,0.7);
-    margin:0;
-    font-family:'IBM Plex Mono',monospace;
-    letter-spacing:0.05em;
+  .modal-head .mh-time{
+    font-size:11.5px;color:rgba(255,255,255,0.6);
+    font-family:'IBM Plex Mono',monospace;margin-top:4px;
   }
-
-  .modal-body{
-    padding:20px 22px;
-  }
-
+  .modal-body{padding:18px 20px;}
   .modal-ref{
-    background:rgba(200,16,46,0.12);
-    border:1px solid rgba(200,16,46,0.25);
-    border-radius:10px;
-    padding:10px 14px;
-    margin-bottom:18px;
-    text-align:center;
+    background:var(--red-glow);border:1px solid rgba(200,16,46,0.25);
+    border-radius:9px;padding:10px 14px;margin-bottom:16px;text-align:center;
   }
-  .modal-ref .ref-label{
-    font-size:11px;
-    color:#A8A39A;
-    font-family:'IBM Plex Mono',monospace;
-    letter-spacing:0.1em;
-    text-transform:uppercase;
+  .modal-ref .mr-label{
+    font-size:10.5px;color:var(--ink-soft);
+    font-family:'IBM Plex Mono',monospace;letter-spacing:0.1em;text-transform:uppercase;
   }
-  .modal-ref .ref-num{
-    font-family:'IBM Plex Mono',monospace;
-    font-size:18px;
-    font-weight:600;
-    color:#F5F2EA;
-    letter-spacing:0.08em;
+  .modal-ref .mr-num{
+    font-family:'IBM Plex Mono',monospace;font-size:17px;
+    font-weight:600;color:var(--ink);letter-spacing:0.06em;margin-top:2px;
   }
-
-  .modal-section-title{
-    font-size:11px;
-    font-family:'IBM Plex Mono',monospace;
-    letter-spacing:0.12em;
-    text-transform:uppercase;
-    color:#A8A39A;
-    margin:0 0 8px;
-  }
-
   .modal-info{
-    background:#0F0E0D;
-    border:1px solid #2A2724;
-    border-radius:10px;
-    padding:14px;
-    margin-bottom:16px;
+    background:var(--bg);border:1px solid var(--line);
+    border-radius:9px;padding:12px 14px;margin-bottom:14px;
   }
   .modal-info-row{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:5px 0;
-    border-bottom:1px solid #1E1C1A;
+    display:flex;justify-content:space-between;align-items:center;
+    padding:5px 0;border-bottom:1px solid var(--line);
   }
-  .modal-info-row:last-child{ border-bottom:none; }
-  .modal-info-row .label{
-    font-size:12px;
-    color:#A8A39A;
-    font-weight:500;
-  }
-  .modal-info-row .value{
-    font-size:13px;
-    color:#F5F2EA;
-    font-weight:600;
-    text-align:right;
-  }
-
-  .modal-items{
-    background:#0F0E0D;
-    border:1px solid #2A2724;
-    border-radius:10px;
-    overflow:hidden;
-    margin-bottom:16px;
+  .modal-info-row:last-child{border-bottom:none;}
+  .modal-info-row .mil{font-size:11.5px;color:var(--ink-soft);}
+  .modal-info-row .miv{font-size:13px;color:var(--ink);font-weight:600;text-align:right;}
+  .modal-items-title{
+    font-family:'IBM Plex Mono',monospace;font-size:10.5px;
+    letter-spacing:0.12em;text-transform:uppercase;
+    color:var(--ink-soft);margin-bottom:8px;
   }
   .modal-item{
-    display:flex;
-    align-items:center;
-    gap:12px;
-    padding:12px 14px;
-    border-bottom:1px solid #1E1C1A;
+    display:flex;align-items:center;gap:10px;
+    background:var(--bg);border:1px solid var(--line);
+    border-radius:9px;padding:10px 12px;margin-bottom:8px;
   }
-  .modal-item:last-child{ border-bottom:none; }
-  .modal-item-num{
-    width:24px;
-    height:24px;
-    border-radius:50%;
-    background:var(--indigo);
-    color:#fff;
-    font-size:11px;
-    font-weight:700;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    flex-shrink:0;
+  .modal-item:last-child{margin-bottom:0;}
+  .mi-num{
+    width:22px;height:22px;border-radius:50%;background:var(--red);
+    color:#fff;font-size:11px;font-weight:700;
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
   }
-  .modal-item-info{
-    flex:1;
+  .mi-info{flex:1;}
+  .mi-jenis{font-size:13px;font-weight:700;color:var(--ink);}
+  .mi-saiz{font-size:11.5px;color:var(--ink-soft);margin-top:1px;}
+  .mi-qty{
+    font-family:'IBM Plex Mono',monospace;font-size:13px;
+    font-weight:600;color:var(--red);
   }
-  .modal-item-info .jenis{
-    font-size:13px;
-    font-weight:700;
-    color:#F5F2EA;
-  }
-  .modal-item-info .saiz{
-    font-size:12px;
-    color:#A8A39A;
-    margin-top:1px;
-  }
-  .modal-item-qty{
-    background:rgba(200,16,46,0.15);
-    border:1px solid rgba(200,16,46,0.3);
-    border-radius:6px;
-    padding:3px 10px;
-    font-size:13px;
-    font-weight:700;
-    color:var(--indigo);
-    font-family:'IBM Plex Mono',monospace;
-  }
-
   .modal-total{
-    background:linear-gradient(135deg, rgba(200,16,46,0.15), rgba(142,11,32,0.1));
-    border:1px solid rgba(200,16,46,0.3);
-    border-radius:10px;
-    padding:14px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:20px;
+    display:flex;justify-content:space-between;align-items:center;
+    background:var(--red-glow);border:1px solid rgba(200,16,46,0.25);
+    border-radius:9px;padding:12px 14px;margin:14px 0 16px;
   }
-  .modal-total .total-label{
-    font-size:13px;
-    font-weight:700;
-    color:#F5F2EA;
-    font-family:'Space Grotesk',sans-serif;
-  }
-  .modal-total .total-val{
+  .mt-label{font-size:13px;font-weight:600;color:var(--ink);}
+  .mt-sub{font-size:11px;color:var(--ink-soft);margin-top:1px;}
+  .mt-val{
     font-family:'Black Ops One',sans-serif;
-    font-size:22px;
-    color:var(--indigo);
-    letter-spacing:0.02em;
+    font-size:20px;color:var(--red);
   }
-  .modal-total .total-unit{
-    font-size:12px;
-    color:#A8A39A;
-    font-family:'IBM Plex Mono',monospace;
+  .modal-close{
+    width:100%;padding:13px;border:none;border-radius:10px;
+    background:var(--red);color:#fff;
+    font-family:'Space Grotesk',sans-serif;font-weight:700;
+    font-size:14px;cursor:pointer;transition:background .15s;
   }
+  .modal-close:hover{background:var(--red-deep);}
 
-  .modal-close-btn{
-    width:100%;
-    padding:14px;
-    border:none;
-    border-radius:10px;
-    background:var(--indigo);
-    color:#fff;
-    font-family:'Space Grotesk',sans-serif;
-    font-weight:700;
-    font-size:15px;
-    cursor:pointer;
-    transition:background .15s ease;
-    letter-spacing:0.02em;
-  }
-  .modal-close-btn:hover{ background:var(--indigo-deep); }
+  footer{text-align:center;margin-top:28px;font-size:12px;color:#5A5650;}
 </style>
 </head>
 <body>
@@ -511,285 +378,431 @@
 <div class="wrap">
 
   <div class="hero">
-    <div class="eyebrow">Borang Tempahan</div>
+    <div class="eyebrow">The Red Knights • 17-7-17</div>
     <h1>HELLO TRKIAN!</h1>
-    <p>Isi maklumat di bawah untuk tempah jersi TRK On Tour. Boleh tambah lebih daripada satu jenis dan saiz dalam tempahan yang sama.</p>
+    <p>Tempahan jersi TRK On Tour — Retro Collar inspired by Kelantan 1997.</p>
   </div>
 
   <div class="posters">
-    <img class="poster" src="https://raw.githubusercontent.com/adminadproject/TRK/refs/heads/main/POSTER%20TRK%20COMPLETE.png" alt="Poster TRK On Tour - Jersi Retro Collar">
-    <img class="poster" src="https://raw.githubusercontent.com/adminadproject/TRK/refs/heads/main/UKURAN%20BAJU.png" alt="Carta Saiz Baju">
+    <img src="https://raw.githubusercontent.com/adminadproject/TRK/refs/heads/main/POSTER%20TRK%20COMPLETE.png" alt="Poster TRK On Tour">
+    <img src="https://raw.githubusercontent.com/adminadproject/TRK/refs/heads/main/UKURAN%20BAJU.png" alt="Carta Saiz Baju">
   </div>
 
-  <div class="card">
-
-    <p class="section-label">Maklumat Pelanggan</p>
-    <div class="field">
-      <label for="nama">Nama Penuh</label>
-      <input type="text" id="nama" placeholder="Contoh: Ahmad Bin Ali" required>
+  <!-- GATE — pilihan awal -->
+  <div id="viewGate" class="view active">
+    <div class="gate">
+      <button class="gate-btn primary" onclick="showView('viewOrder')">
+        <span class="gate-icon">🛒</span>
+        <span class="gate-title">Tempah Sekarang</span>
+        <span class="gate-sub">Isi borang & hantar order baru</span>
+      </button>
+      <button class="gate-btn" onclick="showView('viewSemak')">
+        <span class="gate-icon">🔍</span>
+        <span class="gate-title">Semak Order</span>
+        <span class="gate-sub">Cari & edit order sedia ada</span>
+      </button>
     </div>
-    <div class="field" style="margin-bottom:22px;">
-      <label for="telefon">No. Telefon</label>
-      <input type="tel" id="telefon" placeholder="Contoh: 012-3456789" required>
-    </div>
-
-    <p class="section-label">Pesanan Tempahan</p>
-    <div id="items"></div>
-
-    <button type="button" class="add-btn" id="addItemBtn">+ Tambah Pesanan Lain</button>
-
-    <button type="button" class="submit-btn" id="submitBtn">Hantar Order</button>
-
-    <div class="status" id="status"></div>
-
   </div>
 
-  <footer>Maklumat akan dihantar terus ke sistem tempahan kami.</footer>
+  <!-- VIEW — BORANG ORDER BARU -->
+  <div id="viewOrder" class="view">
+    <button class="back-link" onclick="showView('viewGate')">← Kembali</button>
+    <div class="card">
+      <p class="sec-label">Maklumat Pelanggan</p>
+      <div class="field">
+        <label>Nama Penuh</label>
+        <input type="text" id="nama" placeholder="Contoh: Ahmad Bin Ali">
+      </div>
+      <div class="field" style="margin-bottom:20px;">
+        <label>No. Telefon</label>
+        <input type="tel" id="telefon" placeholder="Contoh: 0123456789">
+      </div>
 
+      <p class="sec-label">Pesanan Tempahan</p>
+      <div id="items"></div>
+      <button class="add-btn" id="addItemBtn">+ Tambah Pesanan Lain</button>
+      <button class="submit-btn" id="submitBtn">Hantar Order</button>
+      <div class="status" id="statusOrder"></div>
+    </div>
+  </div>
+
+  <!-- VIEW — SEMAK ORDER -->
+  <div id="viewSemak" class="view">
+    <button class="back-link" onclick="showView('viewGate')">← Kembali</button>
+    <div class="card">
+      <p class="sec-label">Cari Order</p>
+      <div class="field">
+        <label>No. Rujukan</label>
+        <input type="text" id="inputRujukan" placeholder="Contoh: M8X2ABCD" style="text-transform:uppercase;">
+      </div>
+      <button class="submit-btn" id="semakBtn" onclick="semakOrder()">Cari Order</button>
+      <div class="status" id="statusSemak"></div>
+    </div>
+
+    <div class="semak-result" id="semakResult">
+      <div class="result-card">
+        <div class="result-header">
+          <div class="rh-label">No. Rujukan</div>
+          <div class="rh-ref" id="resultRef">—</div>
+        </div>
+        <div class="result-body">
+          <div class="result-info-row">
+            <span class="rl">Nama</span>
+            <span class="rv" id="resultNama">—</span>
+          </div>
+          <div class="result-info-row">
+            <span class="rl">No. Telefon</span>
+            <span class="rv" id="resultTelefon">—</span>
+          </div>
+          <div class="result-items-title">Senarai Pesanan</div>
+          <div id="resultItems"></div>
+          <div class="result-total">
+            <span class="rt-label">Jumlah Helai</span>
+            <span class="rt-val" id="resultTotal">0</span>
+          </div>
+          <button class="edit-btn" id="editBtn" onclick="muatEditOrder()">✏️ Edit Order Ini</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIEW — EDIT ORDER -->
+  <div id="viewEdit" class="view">
+    <button class="back-link" onclick="showView('viewSemak')">← Kembali ke Semakan</button>
+    <div class="card">
+      <p class="sec-label">Edit Order</p>
+      <div style="background:var(--red-glow);border:1px solid rgba(200,16,46,0.25);border-radius:9px;padding:10px 14px;margin-bottom:16px;">
+        <div style="font-size:11px;color:var(--ink-soft);font-family:'IBM Plex Mono',monospace;letter-spacing:0.1em;">NO. RUJUKAN</div>
+        <div id="editRefDisplay" style="font-family:'IBM Plex Mono',monospace;font-size:16px;font-weight:600;color:var(--ink);margin-top:2px;">—</div>
+      </div>
+      <div class="field">
+        <label>Nama Penuh</label>
+        <input type="text" id="editNama" placeholder="Nama penuh">
+      </div>
+      <div class="field" style="margin-bottom:20px;">
+        <label>No. Telefon</label>
+        <input type="tel" id="editTelefon" placeholder="No. telefon">
+      </div>
+      <p class="sec-label">Pesanan Tempahan</p>
+      <div id="editItems"></div>
+      <button class="add-btn" id="addEditItemBtn">+ Tambah Pesanan Lain</button>
+      <button class="submit-btn" id="editSubmitBtn" onclick="submitEdit()">Simpan Perubahan</button>
+      <div class="status" id="statusEdit"></div>
+    </div>
+  </div>
+
+  <footer>Proud n Loyal — Over Land And Sea 🔴⚫</footer>
 </div>
 
-<!-- Modal Summary Order -->
+<!-- MODAL -->
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal">
-    <div class="modal-header">
-      <span class="check-icon">✅</span>
+    <div class="modal-head">
+      <span class="mh-icon">✅</span>
       <h2>ORDER BERJAYA!</h2>
-      <p id="modalTimestamp"></p>
+      <div class="mh-time" id="modalTime"></div>
     </div>
     <div class="modal-body">
       <div class="modal-ref">
-        <div class="ref-label">No. Rujukan</div>
-        <div class="ref-num" id="modalRefNum">—</div>
+        <div class="mr-label">No. Rujukan — Simpan untuk rujukan</div>
+        <div class="mr-num" id="modalRef">—</div>
       </div>
-
-      <div class="modal-section-title">Maklumat Pelanggan</div>
       <div class="modal-info">
-        <div class="modal-info-row">
-          <span class="label">Nama</span>
-          <span class="value" id="modalNama">—</span>
-        </div>
-        <div class="modal-info-row">
-          <span class="label">No. Telefon</span>
-          <span class="value" id="modalTelefon">—</span>
-        </div>
+        <div class="modal-info-row"><span class="mil">Nama</span><span class="miv" id="modalNama">—</span></div>
+        <div class="modal-info-row"><span class="mil">No. Telefon</span><span class="miv" id="modalTel">—</span></div>
       </div>
-
-      <div class="modal-section-title">Senarai Pesanan</div>
-      <div class="modal-items" id="modalItems"></div>
-
+      <div class="modal-items-title">Senarai Pesanan</div>
+      <div id="modalItemsList"></div>
       <div class="modal-total">
-        <div>
-          <div class="total-label">Jumlah Helai</div>
-          <div class="total-unit">Keseluruhan Order</div>
-        </div>
-        <div class="total-val" id="modalTotal">0</div>
+        <div><div class="mt-label">Jumlah Helai</div><div class="mt-sub">Keseluruhan order</div></div>
+        <div class="mt-val" id="modalTotal">0</div>
       </div>
-
-      <button class="modal-close-btn" id="modalCloseBtn">Tutup</button>
+      <button class="modal-close" onclick="tutupModal()">Tutup</button>
     </div>
   </div>
 </div>
 
 <script>
-  // ============================================================
-  // KONFIGURASI — tukar URL ini kepada URL Web App Google Apps Script anda
-  // ============================================================
-  const GOOGLE_SHEET_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbyIS1d5O2p5xXMvgjA2GOcNWPRxdwDCfJjHOlhSOVpVh2qWfwYpu7S_JutrEInaDrg2/exec";
+  const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzstYu2hX64TCCoowLDS1OYAjsEaO9pLRsqNpXhLO2hJqTHmW8_wLIXw1uK1QGOCvt7/exec";
 
-  // Tukar senarai ini ikut produk sebenar kedai anda
-  const JENIS_OPTIONS = ["ROUNDNECK", "RETRO", "ROUNDNECK LP", "RETRO LP", "MUSLIMAH"];
-  const SAIZ_OPTIONS = ["XS", "S", "M", "L", "XL", "XXL", "3XL", "4XL", "5XL", "6XL", "7XL", "8XL", "9XL", "K28", "K30", "K32", "K34", "K36", "K38"];
+  const JENIS_OPTIONS = ["ROUNDNECK","RETRO","ROUNDNECK LP","RETRO LP","MUSLIMAH"];
+  const SAIZ_OPTIONS  = ["XS","S","M","L","XL","XXL","3XL","4XL","5XL","6XL","7XL","8XL","K28","K30","K32","K34","K36","K38"];
 
-  let itemCount = 0;
+  let orderItemCount = 0;
+  let editItemCount  = 0;
+  let currentEditRef = null;
+  let currentOrderData = null;
 
-  function createItemRow() {
-    itemCount++;
-    const id = itemCount;
+  /* ---- VIEWS ---- */
+  function showView(id){
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+
+  /* ---- NORMALIZE PHONE ---- */
+  function normalizePhone(p){
+    let d = p.replace(/\D/g,"");
+    if(d.startsWith("60")) d=d.substring(2);
+    else if(d.startsWith("0")) d=d.substring(1);
+    return d;
+  }
+
+  /* ---- CREATE ITEM ROW ---- */
+  function createRow(containerId, countRef, isEdit){
+    const cnt = isEdit ? (++editItemCount) : (++orderItemCount);
     const div = document.createElement("div");
     div.className = "tag";
-    div.dataset.id = id;
-
+    div.dataset.id = cnt;
     div.innerHTML = `
       <div class="tag-head">
-        <span class="tag-num"><span class="hole"></span> Pesanan ${String(id).padStart(2,"0")}</span>
-        <button type="button" class="remove-btn" data-remove="${id}">Buang</button>
+        <span class="tag-num">⬡ Pesanan ${String(cnt).padStart(2,"0")}</span>
+        <button type="button" class="remove-btn" data-remove="${cnt}" data-container="${containerId}">Buang</button>
       </div>
       <div class="tag-grid">
-        <div>
-          <label>Jenis</label>
-          <select class="f-jenis">
-            ${JENIS_OPTIONS.map(j => `<option value="${j}">${j}</option>`).join("")}
-          </select>
+        <div class="field"><label>Jenis</label>
+          <select class="f-jenis">${JENIS_OPTIONS.map(j=>`<option value="${j}">${j}</option>`).join("")}</select>
         </div>
-        <div>
-          <label>Saiz</label>
-          <select class="f-saiz">
-            ${SAIZ_OPTIONS.map(s => `<option value="${s}">${s}</option>`).join("")}
-          </select>
+        <div class="field"><label>Saiz</label>
+          <select class="f-saiz">${SAIZ_OPTIONS.map(s=>`<option value="${s}">${s}</option>`).join("")}</select>
         </div>
-        <div>
-          <label>Kuantiti</label>
+        <div class="field"><label>Kuantiti</label>
           <input type="number" class="f-kuantiti" min="1" value="1">
         </div>
-      </div>
-    `;
+      </div>`;
     return div;
   }
 
-  const itemsContainer = document.getElementById("items");
-
-  function addItem() {
-    const row = createItemRow();
-    itemsContainer.appendChild(row);
-    refreshRemoveButtons();
+  function addItem(containerId, isEdit){
+    const c = document.getElementById(containerId);
+    c.appendChild(createRow(containerId, isEdit ? editItemCount : orderItemCount, isEdit));
+    refreshRemove(containerId);
   }
 
-  function refreshRemoveButtons() {
-    const rows = itemsContainer.querySelectorAll(".tag");
-    rows.forEach(row => {
-      const btn = row.querySelector(".remove-btn");
-      btn.style.visibility = rows.length > 1 ? "visible" : "hidden";
+  function refreshRemove(containerId){
+    const rows = document.getElementById(containerId).querySelectorAll(".tag");
+    rows.forEach(r=>{
+      r.querySelector(".remove-btn").style.visibility = rows.length>1?"visible":"hidden";
     });
   }
 
-  itemsContainer.addEventListener("click", (e) => {
-    if (e.target.matches("[data-remove]")) {
-      const id = e.target.getAttribute("data-remove");
-      const row = itemsContainer.querySelector(`.tag[data-id="${id}"]`);
-      if (row) row.remove();
-      refreshRemoveButtons();
+  document.addEventListener("click", e=>{
+    if(e.target.matches("[data-remove]")){
+      const cid  = e.target.getAttribute("data-container");
+      const id   = e.target.getAttribute("data-remove");
+      const row  = document.querySelector(`#${cid} .tag[data-id="${id}"]`);
+      if(row) row.remove();
+      refreshRemove(cid);
     }
   });
 
-  document.getElementById("addItemBtn").addEventListener("click", addItem);
+  document.getElementById("addItemBtn").addEventListener("click",()=>addItem("items",false));
+  document.getElementById("addEditItemBtn").addEventListener("click",()=>addItem("editItems",true));
 
-  // Mula dengan satu item
-  addItem();
-
-  // ---------------- Modal ----------------
-  const modalOverlay = document.getElementById("modalOverlay");
-  document.getElementById("modalCloseBtn").addEventListener("click", () => {
-    modalOverlay.classList.remove("show");
-    document.body.style.overflow = "";
-  });
-  modalOverlay.addEventListener("click", (e) => {
-    if (e.target === modalOverlay) {
-      modalOverlay.classList.remove("show");
-      document.body.style.overflow = "";
-    }
-  });
-
-  function showModal(nama, telefon, items, orderId) {
-    document.getElementById("modalRefNum").textContent = orderId;
-    document.getElementById("modalNama").textContent = nama;
-    document.getElementById("modalTelefon").textContent = telefon;
-
-    // Timestamp
-    const now = new Date();
-    const ts = now.toLocaleDateString("ms-MY", {day:"2-digit",month:"long",year:"numeric"})
-      + " • " + now.toLocaleTimeString("ms-MY", {hour:"2-digit",minute:"2-digit"});
-    document.getElementById("modalTimestamp").textContent = ts;
-
-    // Senarai item
-    const container = document.getElementById("modalItems");
-    container.innerHTML = "";
-    let totalHelai = 0;
-    items.forEach((item, idx) => {
-      totalHelai += item.kuantiti;
-      const div = document.createElement("div");
-      div.className = "modal-item";
-      div.innerHTML = `
-        <div class="modal-item-num">${idx + 1}</div>
-        <div class="modal-item-info">
-          <div class="jenis">${item.jenis}</div>
-          <div class="saiz">Saiz: ${item.saiz}</div>
-        </div>
-        <div class="modal-item-qty">x${item.kuantiti}</div>
-      `;
-      container.appendChild(div);
-    });
-
-    document.getElementById("modalTotal").textContent = totalHelai + " helai";
-    modalOverlay.classList.add("show");
-    document.body.style.overflow = "hidden";
+  /* ---- STATUS HELPER ---- */
+  function setStatus(id,type,html){
+    const el=document.getElementById(id);
+    el.className="status show "+type;
+    el.innerHTML=html;
+  }
+  function clearStatus(id){
+    const el=document.getElementById(id);
+    el.className="status";el.innerHTML="";
   }
 
-  // ---------------- Submit ----------------
-  const statusEl = document.getElementById("status");
-  const submitBtn = document.getElementById("submitBtn");
-
-  function setStatus(type, html) {
-    statusEl.className = "status show " + type;
-    statusEl.innerHTML = html;
-  }
-
-  document.getElementById("submitBtn").addEventListener("click", async () => {
-    const nama = document.getElementById("nama").value.trim();
-    const telefon = document.getElementById("telefon").value.trim();
-
-    if (!nama || !telefon) {
-      setStatus("error", "Sila isi nama dan no. telefon.");
-      return;
-    }
-
-    const rows = itemsContainer.querySelectorAll(".tag");
-    const items = Array.from(rows).map(row => ({
-      jenis: row.querySelector(".f-jenis").value,
-      saiz: row.querySelector(".f-saiz").value,
-      kuantiti: parseInt(row.querySelector(".f-kuantiti").value, 10) || 1
+  /* ---- COLLECT ITEMS FROM CONTAINER ---- */
+  function collectItems(containerId){
+    return Array.from(document.getElementById(containerId).querySelectorAll(".tag")).map(row=>({
+      jenis:row.querySelector(".f-jenis").value,
+      saiz:row.querySelector(".f-saiz").value,
+      kuantiti:parseInt(row.querySelector(".f-kuantiti").value)||1
     }));
+  }
 
-    if (items.length === 0) {
-      setStatus("error", "Sila tambah sekurang-kurangnya satu pesanan.");
-      return;
-    }
+  /* ---- SUBMIT ORDER BARU ---- */
+  document.getElementById("submitBtn").addEventListener("click", async()=>{
+    const nama   = document.getElementById("nama").value.trim();
+    const telefon= document.getElementById("telefon").value.trim();
+    if(!nama||!telefon){ setStatus("statusOrder","error","Sila isi nama dan no. telefon."); return; }
 
-    // Kembangkan setiap item ikut kuantiti - 1 row dalam sheet = 1 helai/seluar
-    const rowsToSend = [];
-    items.forEach(item => {
-      for (let i = 0; i < item.kuantiti; i++) {
-        rowsToSend.push({ jenis: item.jenis, saiz: item.saiz });
-      }
-    });
+    const items = collectItems("items");
+    if(!items.length){ setStatus("statusOrder","error","Sila tambah sekurang-kurangnya satu pesanan."); return; }
+
+    const rowsToSend=[];
+    items.forEach(item=>{ for(let i=0;i<item.kuantiti;i++) rowsToSend.push({jenis:item.jenis,saiz:item.saiz}); });
 
     const orderId = Date.now().toString(36).toUpperCase();
-    const payload = { orderId, nama, telefon, rows: rowsToSend };
+    document.getElementById("submitBtn").disabled=true;
+    setStatus("statusOrder","loading","Menghantar order...");
 
-    submitBtn.disabled = true;
-    setStatus("loading", "Menghantar order anda...");
-
-    try {
-      if (!GOOGLE_SHEET_WEBAPP_URL || GOOGLE_SHEET_WEBAPP_URL.indexOf("http") !== 0) {
-        throw new Error("URL Google Sheet belum dikonfigurasi.");
-      }
-
-      await fetch(GOOGLE_SHEET_WEBAPP_URL, {
-        method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify(payload)
+    try{
+      await fetch(WEBAPP_URL,{
+        method:"POST", mode:"no-cors",
+        headers:{"Content-Type":"text/plain;charset=utf-8"},
+        body:JSON.stringify({action:"new",orderId,nama,telefon,rows:rowsToSend})
       });
-
-      const totalHelai = rowsToSend.length;
-      setStatus("success", `Order diterima! (${totalHelai} helai) — No. Rujukan: <span class="order-id">${orderId}</span>`);
-      showModal(nama, telefon, items, orderId);
-
-      // Reset borang
-      document.getElementById("nama").value = "";
-      document.getElementById("telefon").value = "";
-      itemsContainer.innerHTML = "";
-      itemCount = 0;
-      addItem();
-
-    } catch (err) {
-      setStatus("error", "Maaf, order gagal dihantar. Sila cuba lagi atau hubungi kami terus.");
-      console.error(err);
-    } finally {
-      submitBtn.disabled = false;
+      clearStatus("statusOrder");
+      showModal(nama, normalizePhone(telefon), items, orderId);
+      document.getElementById("nama").value="";
+      document.getElementById("telefon").value="";
+      document.getElementById("items").innerHTML="";
+      orderItemCount=0; addItem("items",false);
+    }catch(err){
+      setStatus("statusOrder","error","Gagal hantar. Cuba lagi.");
+    }finally{
+      document.getElementById("submitBtn").disabled=false;
     }
   });
+
+  /* ---- SEMAK ORDER ---- */
+  async function semakOrder(){
+    const rujukan = document.getElementById("inputRujukan").value.trim().toUpperCase();
+    if(!rujukan){ setStatus("statusSemak","error","Sila masukkan No. Rujukan."); return; }
+
+    document.getElementById("semakBtn").disabled=true;
+    setStatus("statusSemak","loading","Mencari order...");
+    document.getElementById("semakResult").classList.remove("show");
+
+    try{
+      const res  = await fetch(`${WEBAPP_URL}?rujukan=${rujukan}`);
+      const data = await res.json();
+
+      if(data.result==="notfound"){
+        setStatus("statusSemak","error","Order tidak dijumpai. Semak semula No. Rujukan.");
+        return;
+      }
+
+      currentOrderData = data;
+      clearStatus("statusSemak");
+      document.getElementById("resultRef").textContent    = data.orderId;
+      document.getElementById("resultNama").textContent   = data.nama;
+      document.getElementById("resultTelefon").textContent= data.telefon;
+
+      const itemsEl = document.getElementById("resultItems");
+      itemsEl.innerHTML="";
+      let total=0;
+      data.items.forEach(item=>{
+        total+=item.kuantiti;
+        itemsEl.innerHTML+=`
+          <div class="result-item">
+            <div class="ri-dot"></div>
+            <div class="ri-info">
+              <div class="ri-jenis">${item.jenis}</div>
+              <div class="ri-saiz">Saiz: ${item.saiz}</div>
+            </div>
+            <div class="ri-qty">x${item.kuantiti}</div>
+          </div>`;
+      });
+      document.getElementById("resultTotal").textContent = total+" helai";
+      document.getElementById("semakResult").classList.add("show");
+
+    }catch(err){
+      setStatus("statusSemak","error","Gagal mendapatkan data. Cuba lagi.");
+    }finally{
+      document.getElementById("semakBtn").disabled=false;
+    }
+  }
+
+  /* ---- MUAT EDIT ORDER ---- */
+  function muatEditOrder(){
+    if(!currentOrderData) return;
+    currentEditRef = currentOrderData.orderId;
+    document.getElementById("editRefDisplay").textContent = currentEditRef;
+    document.getElementById("editNama").value    = currentOrderData.nama;
+    document.getElementById("editTelefon").value = currentOrderData.telefon;
+
+    const ec = document.getElementById("editItems");
+    ec.innerHTML=""; editItemCount=0;
+
+    currentOrderData.items.forEach(item=>{
+      addItem("editItems",true);
+      const tag = ec.querySelector(`.tag[data-id="${editItemCount}"]`);
+      tag.querySelector(".f-jenis").value    = item.jenis;
+      tag.querySelector(".f-saiz").value     = item.saiz;
+      tag.querySelector(".f-kuantiti").value = item.kuantiti;
+    });
+    showView("viewEdit");
+  }
+
+  /* ---- SUBMIT EDIT ---- */
+  async function submitEdit(){
+    const nama   = document.getElementById("editNama").value.trim();
+    const telefon= document.getElementById("editTelefon").value.trim();
+    if(!nama||!telefon){ setStatus("statusEdit","error","Sila isi nama dan no. telefon."); return; }
+
+    const items = collectItems("editItems");
+    if(!items.length){ setStatus("statusEdit","error","Sila tambah sekurang-kurangnya satu pesanan."); return; }
+
+    const rowsToSend=[];
+    items.forEach(item=>{ for(let i=0;i<item.kuantiti;i++) rowsToSend.push({jenis:item.jenis,saiz:item.saiz}); });
+
+    document.getElementById("editSubmitBtn").disabled=true;
+    setStatus("statusEdit","loading","Menyimpan perubahan...");
+
+    try{
+      await fetch(WEBAPP_URL,{
+        method:"POST", mode:"no-cors",
+        headers:{"Content-Type":"text/plain;charset=utf-8"},
+        body:JSON.stringify({action:"edit",orderId:currentEditRef,nama,telefon,rows:rowsToSend})
+      });
+      clearStatus("statusEdit");
+      showModal(nama, normalizePhone(telefon), items, currentEditRef, true);
+    }catch(err){
+      setStatus("statusEdit","error","Gagal simpan. Cuba lagi.");
+    }finally{
+      document.getElementById("editSubmitBtn").disabled=false;
+    }
+  }
+
+  /* ---- MODAL ---- */
+  function showModal(nama, telefon, items, orderId, isEdit=false){
+    const now=new Date();
+    document.getElementById("modalTime").textContent =
+      now.toLocaleDateString("ms-MY",{day:"2-digit",month:"long",year:"numeric"})
+      +" • "+now.toLocaleTimeString("ms-MY",{hour:"2-digit",minute:"2-digit"});
+    document.getElementById("modalRef").textContent  = orderId;
+    document.getElementById("modalNama").textContent = nama;
+    document.getElementById("modalTel").textContent  = "0"+telefon;
+
+    const mh=document.querySelector(".modal-head h2");
+    mh.textContent = isEdit ? "ORDER DIKEMASKINI!" : "ORDER BERJAYA!";
+    document.querySelector(".mh-icon").textContent = isEdit ? "✏️" : "✅";
+
+    const list=document.getElementById("modalItemsList");
+    list.innerHTML=""; let total=0;
+    items.forEach((item,i)=>{
+      total+=item.kuantiti;
+      list.innerHTML+=`
+        <div class="modal-item">
+          <div class="mi-num">${i+1}</div>
+          <div class="mi-info">
+            <div class="mi-jenis">${item.jenis}</div>
+            <div class="mi-saiz">Saiz: ${item.saiz}</div>
+          </div>
+          <div class="mi-qty">x${item.kuantiti}</div>
+        </div>`;
+    });
+    document.getElementById("modalTotal").textContent = total+" helai";
+    document.getElementById("modalOverlay").classList.add("show");
+    document.body.style.overflow="hidden";
+  }
+
+  function tutupModal(){
+    document.getElementById("modalOverlay").classList.remove("show");
+    document.body.style.overflow="";
+  }
+  document.getElementById("modalOverlay").addEventListener("click",e=>{
+    if(e.target===document.getElementById("modalOverlay")) tutupModal();
+  });
+
+  /* ---- ENTER key untuk semak ---- */
+  document.getElementById("inputRujukan").addEventListener("keydown",e=>{
+    if(e.key==="Enter") semakOrder();
+  });
+
+  /* ---- INIT ---- */
+  addItem("items",false);
 </script>
 
 </body>
 </html>
-
