@@ -415,7 +415,7 @@
       </div>
       <div class="field" style="margin-bottom:20px;">
         <label>No. Telefon</label>
-        <input type="tel" id="telefon" placeholder="Contoh: 0123456789">
+        <input type="tel" id="telefon" placeholder="Contoh: 0123456789" inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9+\-]/g,'')">
       </div>
 
       <p class="sec-label">Pesanan Tempahan</p>
@@ -481,7 +481,7 @@
       </div>
       <div class="field" style="margin-bottom:20px;">
         <label>No. Telefon</label>
-        <input type="tel" id="editTelefon" placeholder="No. telefon">
+        <input type="tel" id="editTelefon" placeholder="No. telefon" inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9+\-]/g,'')">
       </div>
       <p class="sec-label">Pesanan Tempahan</p>
       <div id="editItems"></div>
@@ -523,7 +523,7 @@
 </div>
 
 <script>
-  const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzstYu2hX64TCCoowLDS1OYAjsEaO9pLRsqNpXhLO2hJqTHmW8_wLIXw1uK1QGOCvt7/exec";
+  const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwm1GBKlAWcMNqe3BOlKucxzyuMxa4eOlV4MaWVXrwGQK7mfSaGMOESDiu6sgrJSsW3/exec";
 
   const JENIS_OPTIONS = ["ROUNDNECK","RETRO","ROUNDNECK LP","RETRO LP","MUSLIMAH"];
   const SAIZ_OPTIONS  = ["XS","S","M","L","XL","XXL","3XL","4XL","5XL","6XL","7XL","8XL","K28","K30","K32","K34","K36","K38"];
