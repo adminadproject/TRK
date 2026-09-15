@@ -404,6 +404,72 @@
   .modal-simpan:hover{background:var(--red-deep);}
 
   footer{text-align:center;margin-top:28px;font-size:12px;color:#5A5650;}
+
+  /* ---- DELIVERY OPTIONS ---- */
+  .delivery-wrap{display:flex;flex-direction:column;gap:10px;margin:14px 0;}
+  .delivery-opt{
+    display:flex;align-items:center;gap:12px;
+    background:var(--bg);border:1.5px solid var(--line2);
+    border-radius:10px;padding:12px 14px;cursor:pointer;
+    transition:border-color .15s;
+  }
+  .delivery-opt:has(input:checked){border-color:var(--red);background:rgba(200,16,46,0.05);}
+  .delivery-opt input[type=radio]{accent-color:var(--red);width:16px;height:16px;flex-shrink:0;cursor:pointer;}
+  .opt-title{font-size:13px;font-weight:700;color:var(--ink);}
+  .opt-sub{font-size:11.5px;color:var(--ink-soft);margin-top:2px;}
+  textarea{
+    width:100%;font-family:'Inter',sans-serif;font-size:14px;
+    padding:11px 12px;border:1.5px solid var(--line2);border-radius:9px;
+    background:var(--bg);color:var(--ink);outline:none;resize:vertical;
+    transition:border-color .15s;min-height:80px;
+  }
+  textarea:focus{border-color:var(--red);}
+
+  .pos-badge{
+    display:inline-block;
+    background:rgba(200,16,46,0.15);
+    color:var(--red);
+    font-size:11px;font-weight:700;
+    padding:2px 8px;border-radius:20px;
+    font-family:'IBM Plex Mono',monospace;
+    margin-top:4px;
+  }
+
+  /* ---- COUNTDOWN ---- */
+  .countdown-wrap{
+    background:linear-gradient(135deg,#1A0608,#0F0C0B);
+    border:1px solid rgba(200,16,46,0.3);
+    border-radius:12px;
+    padding:14px 16px;
+    margin-bottom:18px;
+    text-align:center;
+  }
+  .countdown-label{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;
+    color:var(--ink-soft);margin-bottom:10px;
+  }
+  .countdown-boxes{
+    display:flex;justify-content:center;gap:8px;
+  }
+  .cd-box{
+    display:flex;flex-direction:column;align-items:center;
+    background:var(--bg);border:1px solid var(--line2);
+    border-radius:8px;padding:8px 12px;min-width:56px;
+  }
+  .cd-num{
+    font-family:'Black Ops One',sans-serif;
+    font-size:26px;color:var(--red);line-height:1;
+  }
+  .cd-unit{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:9px;letter-spacing:0.1em;text-transform:uppercase;
+    color:var(--ink-soft);margin-top:4px;
+  }
+  .countdown-closed{
+    font-family:'Black Ops One',sans-serif;
+    font-size:18px;color:var(--red);letter-spacing:0.02em;
+  }
 </style>
 </head>
 <body>
@@ -419,6 +485,17 @@
   <div class="posters">
     <img src="https://raw.githubusercontent.com/adminadproject/TRK/refs/heads/main/POSTER%20TRK%20COMPLETE.png" alt="Poster TRK On Tour">
     <img src="https://raw.githubusercontent.com/adminadproject/TRK/refs/heads/main/UKURAN%20BAJU.png" alt="Carta Saiz Baju">
+  </div>
+
+  <!-- COUNTDOWN -->
+  <div class="countdown-wrap">
+    <div class="countdown-label">⏳ Tempahan ditutup pada 30 September 2026</div>
+    <div class="countdown-boxes" id="countdownBoxes">
+      <div class="cd-box"><div class="cd-num" id="cdDay">--</div><div class="cd-unit">Hari</div></div>
+      <div class="cd-box"><div class="cd-num" id="cdHour">--</div><div class="cd-unit">Jam</div></div>
+      <div class="cd-box"><div class="cd-num" id="cdMin">--</div><div class="cd-unit">Minit</div></div>
+      <div class="cd-box"><div class="cd-num" id="cdSec">--</div><div class="cd-unit">Saat</div></div>
+    </div>
   </div>
 
   <!-- GATE — pilihan awal -->
@@ -454,6 +531,29 @@
       <p class="sec-label">Pesanan Tempahan</p>
       <div id="items"></div>
       <button class="add-btn" id="addItemBtn">+ Tambah Pesanan Lain</button>
+
+      <p class="sec-label" style="margin-top:18px;">Kaedah Penghantaran</p>
+      <div class="delivery-wrap">
+        <label class="delivery-opt">
+          <input type="radio" name="penghantaran" value="COD" checked onchange="toggleAlamat()">
+          <div>
+            <div class="opt-title">🏪 COD — Restoran Balqis, USJ</div>
+            <div class="opt-sub">Tarikh & masa akan dimaklumkan kemudian • FREE</div>
+          </div>
+        </label>
+        <label class="delivery-opt">
+          <input type="radio" name="penghantaran" value="POS" onchange="toggleAlamat()">
+          <div>
+            <div class="opt-title">📦 POS</div>
+            <div class="opt-sub">+RM7 untuk 1 alamat penghantaran</div>
+          </div>
+        </label>
+      </div>
+      <div class="field" id="alamatField" style="display:none;">
+        <label>Alamat Penghantaran</label>
+        <textarea id="alamat" placeholder="No. rumah, jalan, taman, poskod, negeri..."></textarea>
+      </div>
+
       <button class="submit-btn" id="submitBtn">Hantar Order</button>
       <div class="status" id="statusOrder"></div>
     </div>
@@ -530,6 +630,29 @@
       <p class="sec-label">Pesanan Tempahan</p>
       <div id="editItems"></div>
       <button class="add-btn" id="addEditItemBtn">+ Tambah Pesanan Lain</button>
+
+      <p class="sec-label" style="margin-top:18px;">Kaedah Penghantaran</p>
+      <div class="delivery-wrap">
+        <label class="delivery-opt">
+          <input type="radio" name="editPenghantaran" value="COD" checked onchange="toggleEditAlamat()">
+          <div>
+            <div class="opt-title">🏪 COD — Restoran Balqis, USJ</div>
+            <div class="opt-sub">Tarikh & masa akan dimaklumkan kemudian • FREE</div>
+          </div>
+        </label>
+        <label class="delivery-opt">
+          <input type="radio" name="editPenghantaran" value="POS" onchange="toggleEditAlamat()">
+          <div>
+            <div class="opt-title">📦 POS</div>
+            <div class="opt-sub">+RM7 untuk 1 alamat penghantaran</div>
+          </div>
+        </label>
+      </div>
+      <div class="field" id="editAlamatField" style="display:none;">
+        <label>Alamat Penghantaran</label>
+        <textarea id="editAlamat" placeholder="No. rumah, jalan, taman, poskod, negeri..."></textarea>
+      </div>
+
       <button class="submit-btn" id="editSubmitBtn" onclick="submitEdit()">Simpan Perubahan</button>
       <div class="status" id="statusEdit"></div>
     </div>
@@ -550,6 +673,8 @@
       <div class="modal-info">
         <div class="modal-info-row"><span class="mil">Nama</span><span class="miv" id="modalNama">—</span></div>
         <div class="modal-info-row"><span class="mil">No. Telefon</span><span class="miv" id="modalTel">—</span></div>
+        <div class="modal-info-row" id="modalPenghantaranRow"><span class="mil">Penghantaran</span><span class="miv" id="modalPenghantaran">—</span></div>
+        <div class="modal-info-row" id="modalAlamatRow" style="display:none;"><span class="mil">Alamat</span><span class="miv" id="modalAlamatVal" style="font-size:12px;text-align:right;max-width:65%;">—</span></div>
       </div>
       <div class="modal-items-title">Senarai Pesanan</div>
       <div id="modalItemsList"></div>
@@ -686,6 +811,60 @@
     }));
   }
 
+  /* ---- COUNTDOWN ---- */
+  (function(){
+    const TARIKH_TUTUP = new Date("2026-09-30T23:59:59+08:00");
+
+    function updateCountdown(){
+      const now = new Date();
+      const baki = TARIKH_TUTUP - now;
+
+      if(baki <= 0){
+        // Tempahan ditutup
+        document.getElementById("countdownBoxes").innerHTML =
+          '<div class="countdown-closed">🔒 TEMPAHAN TELAH DITUTUP</div>';
+        // Sembunyikan butang tempah baru
+        const gateBtn = document.querySelector(".gate-btn.primary");
+        if(gateBtn){
+          gateBtn.disabled = true;
+          gateBtn.style.opacity = "0.4";
+          gateBtn.style.cursor = "not-allowed";
+          gateBtn.querySelector(".gate-sub").textContent = "Tempahan telah ditutup";
+        }
+        // Sekat submit borang juga
+        const submitBtn = document.getElementById("submitBtn");
+        if(submitBtn){
+          submitBtn.disabled = true;
+          submitBtn.textContent = "Tempahan Telah Ditutup";
+        }
+        return;
+      }
+
+      const hari  = Math.floor(baki / (1000*60*60*24));
+      const jam   = Math.floor((baki % (1000*60*60*24)) / (1000*60*60));
+      const minit = Math.floor((baki % (1000*60*60)) / (1000*60));
+      const saat  = Math.floor((baki % (1000*60)) / 1000);
+
+      document.getElementById("cdDay").textContent  = String(hari).padStart(2,"0");
+      document.getElementById("cdHour").textContent = String(jam).padStart(2,"0");
+      document.getElementById("cdMin").textContent  = String(minit).padStart(2,"0");
+      document.getElementById("cdSec").textContent  = String(saat).padStart(2,"0");
+    }
+
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+  })();
+
+  /* ---- TOGGLE ALAMAT ---- */
+  function toggleAlamat(){
+    const p = document.querySelector('input[name="penghantaran"]:checked').value;
+    document.getElementById("alamatField").style.display = p==="POS" ? "block" : "none";
+  }
+  function toggleEditAlamat(){
+    const p = document.querySelector('input[name="editPenghantaran"]:checked').value;
+    document.getElementById("editAlamatField").style.display = p==="POS" ? "block" : "none";
+  }
+
   /* ---- GENERATE NO RUJUKAN ---- */
   function generateOrderId(telefon) {
     const huruf = "ABCDEFGHJKLMNPQRSTUVWXYZ"; // buang I dan O untuk elak keliru
@@ -705,6 +884,10 @@
     const items = collectItems("items");
     if(!items.length){ setStatus("statusOrder","error","Sila tambah sekurang-kurangnya satu pesanan."); return; }
 
+    const penghantaran = document.querySelector('input[name="penghantaran"]:checked').value;
+    const alamat = document.getElementById("alamat").value.trim();
+    if(penghantaran==="POS" && !alamat){ setStatus("statusOrder","error","Sila isi alamat penghantaran."); return; }
+
     const rowsToSend=[];
     items.forEach(item=>{ for(let i=0;i<item.kuantiti;i++) rowsToSend.push({jenis:item.jenis,saiz:item.saiz}); });
 
@@ -717,12 +900,15 @@
       await fetch(WEBAPP_URL,{
         method:"POST", mode:"no-cors",
         headers:{"Content-Type":"text/plain;charset=utf-8"},
-        body:JSON.stringify({action:"new",orderId,nama,telefon,rows:rowsToSend})
+        body:JSON.stringify({action:"new",orderId,nama,telefon,penghantaran,alamat,rows:rowsToSend})
       });
       clearStatus("statusOrder");
-      showModal(nama, normalizedPhone, items, orderId);
+      showModal(nama, normalizedPhone, items, orderId, false, penghantaran, alamat);
       document.getElementById("nama").value="";
       document.getElementById("telefon").value="";
+      document.getElementById("alamat").value="";
+      document.querySelector('input[name="penghantaran"][value="COD"]').checked=true;
+      document.getElementById("alamatField").style.display="none";
       document.getElementById("items").innerHTML="";
       orderItemCount=0; addItem("items",false);
     }catch(err){
@@ -814,6 +1000,13 @@
     document.getElementById("editNama").value    = currentOrderData.nama;
     document.getElementById("editTelefon").value = currentOrderData.telefon;
 
+    // Prefill penghantaran dan alamat
+    const alamat = currentOrderData.alamat || "";
+    const penghantaran = alamat ? "POS" : "COD";
+    document.querySelector(`input[name="editPenghantaran"][value="${penghantaran}"]`).checked = true;
+    document.getElementById("editAlamat").value = alamat;
+    document.getElementById("editAlamatField").style.display = penghantaran==="POS" ? "block" : "none";
+
     const ec = document.getElementById("editItems");
     ec.innerHTML=""; editItemCount=0;
 
@@ -836,6 +1029,10 @@
     const items = collectItems("editItems");
     if(!items.length){ setStatus("statusEdit","error","Sila tambah sekurang-kurangnya satu pesanan."); return; }
 
+    const penghantaran = document.querySelector('input[name="editPenghantaran"]:checked').value;
+    const alamat = document.getElementById("editAlamat").value.trim();
+    if(penghantaran==="POS" && !alamat){ setStatus("statusEdit","error","Sila isi alamat penghantaran."); return; }
+
     const rowsToSend=[];
     items.forEach(item=>{ for(let i=0;i<item.kuantiti;i++) rowsToSend.push({jenis:item.jenis,saiz:item.saiz}); });
 
@@ -846,10 +1043,10 @@
       await fetch(WEBAPP_URL,{
         method:"POST", mode:"no-cors",
         headers:{"Content-Type":"text/plain;charset=utf-8"},
-        body:JSON.stringify({action:"edit",orderId:currentEditRef,nama,telefon,rows:rowsToSend})
+        body:JSON.stringify({action:"edit",orderId:currentEditRef,nama,telefon,penghantaran,alamat,rows:rowsToSend})
       });
       clearStatus("statusEdit");
-      showModal(nama, normalizePhone(telefon), items, currentEditRef, true);
+      showModal(nama, normalizePhone(telefon), items, currentEditRef, true, penghantaran, alamat);
     }catch(err){
       setStatus("statusEdit","error","Gagal simpan. Cuba lagi.");
     }finally{
@@ -858,7 +1055,7 @@
   }
 
   /* ---- MODAL ---- */
-  function showModal(nama, telefon, items, orderId, isEdit=false){
+  function showModal(nama, telefon, items, orderId, isEdit=false, penghantaran="COD", alamat=""){
     const now=new Date();
     document.getElementById("modalTime").textContent =
       now.toLocaleDateString("ms-MY",{day:"2-digit",month:"long",year:"numeric"})
@@ -867,6 +1064,19 @@
     document.getElementById("modalRefInfo").textContent = orderId;
     document.getElementById("modalNama").textContent = nama;
     document.getElementById("modalTel").textContent  = "0"+telefon;
+
+    // Papar penghantaran
+    const posKos = penghantaran==="POS" ? 7 : 0;
+    document.getElementById("modalPenghantaran").innerHTML =
+      penghantaran==="POS"
+        ? '📦 POS <span class="pos-badge">+RM7</span>'
+        : '🏪 COD — Restoran Balqis, USJ';
+    if(penghantaran==="POS" && alamat){
+      document.getElementById("modalAlamatRow").style.display="flex";
+      document.getElementById("modalAlamatVal").textContent = alamat;
+    } else {
+      document.getElementById("modalAlamatRow").style.display="none";
+    }
 
     const mh=document.querySelector(".modal-head h2");
     mh.textContent = isEdit ? "ORDER DIKEMASKINI!" : "ORDER BERJAYA!";
@@ -890,14 +1100,16 @@
           <div class="mi-qty">RM${hargaItem}</div>
         </div>`;
     });
-    document.getElementById("modalTotal").textContent = total+" helai";
-    document.getElementById("modalHarga").textContent = "RM"+totalHarga;
 
-    // Mesej bayaran (hanya untuk order baru, bukan edit)
+    const jumlahAkhir = totalHarga + posKos;
+    document.getElementById("modalTotal").textContent = total+" helai";
+    document.getElementById("modalHarga").textContent = "RM"+jumlahAkhir;
+
+    // Mesej bayaran
     const bayaranBox = document.getElementById("modalBayaranMsg");
     if(!isEdit){
       bayaranBox.style.display="block";
-      bayaranBox.innerHTML = `Sila buat bayaran <strong>RM${totalHarga}</strong> ke akaun atau QR yang telah diberikan. Terima kasih!<br><br>⚠️ Jangan lupa <strong>simpan resit</strong> ini sebagai bukti tempahan anda.`;
+      bayaranBox.innerHTML = `Sila buat bayaran <strong>RM${jumlahAkhir}</strong> ke akaun atau QR yang telah diberikan. Terima kasih!<br><br>⚠️ Jangan lupa <strong>simpan resit</strong> ini sebagai bukti tempahan anda.`;
       document.getElementById("modalHargaBox").style.display="flex";
     } else {
       bayaranBox.style.display="none";
