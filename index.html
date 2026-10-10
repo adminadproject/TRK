@@ -1,794 +1,820 @@
-<!DOCTYPE html>
-<html lang="ms">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tempah Sekarang — Order Form</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --bg:#0A0A0A;
-    --paper:#F6F2EA;
-    --paper-raised:#FFFFFF;
-    --ink:#211F1C;
-    --ink-soft:#5B5750;
-    --indigo:#C8102E;
-    --indigo-deep:#8E0B20;
-    --mustard:#F5F2EA;
-    --mustard-deep:#C9C5BC;
-    --line:#DAD3C3;
-    --success:#2E7D32;
-    --danger:#C8102E;
-    --radius:14px;
-  }
+/**
+ * AD PROJECT - WEBSITE ORDERS  (v2)
+ * Google Apps Script Web App
+ *
+ * Spreadsheet: AD Project - Website Orders
+ *
+ * Perubahan v2:
+ * - Elak tempahan berganda (SubmissionID daripada borang).
+ * - WhatsApp disimpan sebagai teks format 01XXXXXXXX (sifar depan kekal, serasi backoffice).
+ * - Nama/nota disimpan sebagai teks biasa (elak formula injection).
+ * - Mesej ralat dalaman tidak dipaparkan kepada pelanggan.
+ * - Honeypot memulangkan "berjaya" secara senyap tanpa menyimpan.
+ * - Tarikh dikira ikut zon waktu Asia/Kuala_Lumpur.
+ * - MinimumQty dibaca daripada Settings.
+ *
+ * PENTING: Project Settings > Time zone = (GMT+08:00) Kuala Lumpur.
+ */
 
-  *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;}
-  body{
-    background:var(--bg);
-    color:var(--ink);
-    font-family:'Inter',sans-serif;
-    -webkit-font-smoothing:antialiased;
-    min-height:100vh;
-  }
+const CONFIG = {
+  SPREADSHEET_ID: '15Jch8ohgYIfIrADfLMvo3vCOYOoQ0AUlvH8_HsJR1k0',
 
-  /* ---------- Background texture: faint diagonal weave ---------- */
-  body{
-    background-image:
-      repeating-linear-gradient(135deg, rgba(200,16,46,0.05) 0px, rgba(200,16,46,0.05) 1px, transparent 1px, transparent 14px);
-  }
+  ORDERS_SHEET: 'WebsiteOrders',
+  SETTINGS_SHEET: 'Settings',
+  PRICING_SHEET: 'PricingRules',
 
-  .wrap{
-    max-width:560px;
-    margin:0 auto;
-    padding:32px 20px 80px;
-  }
-  @media (min-width:900px){
-    .wrap{ max-width:640px; padding:48px 24px 100px; }
-  }
+  TIMEZONE: 'Asia/Kuala_Lumpur',
+  LEAD_PREFIX: 'W',
+  LEAD_DIGITS: 4,
 
-  /* ---------- Poster images ---------- */
-  .poster{
-    display:block;
-    width:100%;
-    height:auto;
-    border-radius:10px;
-    margin-bottom:18px;
-    border:2px solid var(--mustard);
-    box-shadow:0 8px 30px rgba(0,0,0,0.5);
-  }
+  MINIMUM_QTY: 10,
+  MAXIMUM_QTY: 100000,
 
-  /* ---------- Hero ---------- */
-  .hero{
-    text-align:center;
-    padding:18px 0 28px;
-  }
-  .hero .eyebrow{
-    font-family:'IBM Plex Mono',monospace;
-    font-size:12px;
-    letter-spacing:0.18em;
-    text-transform:uppercase;
-    color:var(--mustard);
-    font-weight:600;
-  }
-  .hero h1{
-    font-family:'Black Ops One',sans-serif;
-    font-weight:400;
-    font-size:clamp(28px,7.5vw,46px);
-    margin:10px 0 10px;
-    color:var(--mustard);
-    text-shadow:2px 2px 0 var(--indigo-deep), 0 0 22px rgba(200,16,46,0.35);
-    letter-spacing:0.02em;
-    line-height:1.25;
-    text-transform:uppercase;
-  }
-  .hero p{
-    color:#D8D5CE;
-    font-size:14.5px;
-    margin:0;
-    line-height:1.5;
-  }
+  DATE_FORMAT: 'dd/MM/yyyy',
+  DATETIME_FORMAT: 'dd/MM/yyyy HH:mm:ss',
 
-  /* ---------- Card shell ---------- */
-  .card{
-    background:var(--paper-raised);
-    border-radius:var(--radius);
-    border:1px solid var(--line);
-    padding:24px 22px;
-    box-shadow:0 1px 2px rgba(33,31,28,0.04), 0 8px 24px rgba(33,31,28,0.05);
-  }
+  GENERIC_ERROR: 'Tempahan tidak berjaya diproses. Sila cuba sekali lagi atau hubungi admin AD Project.'
+};
 
-  .section-label{
-    font-family:'IBM Plex Mono',monospace;
-    font-size:11px;
-    letter-spacing:0.14em;
-    text-transform:uppercase;
-    color:var(--ink-soft);
-    margin:0 0 12px;
-    display:flex;
-    align-items:center;
-    gap:8px;
-  }
-  .section-label::after{
-    content:"";
-    flex:1;
-    height:1px;
-    background:var(--line);
-  }
+const ORDER_HEADERS = [
+  'WebsiteLeadID',
+  'CreatedAt',
+  'CustomerName',
+  'OrderDisplayName',
+  'WhatsApp',
+  'ShirtType',
+  'Quantity',
+  'DateNeeded',
+  'UnitPrice',
+  'EstimatedTotal',
+  'CustomerNotes',
+  'LeadStatus',
+  'ImportStatus',
+  'BackofficeOrderID',
+  'ImportedAt',
+  'LastUpdatedAt'
+];
 
-  /* ---------- Inputs ---------- */
-  label{
-    display:block;
-    font-size:13px;
-    font-weight:600;
-    color:var(--ink);
-    margin-bottom:6px;
-  }
-  input[type=text], input[type=tel], select, input[type=number]{
-    width:100%;
-    font-family:'Inter',sans-serif;
-    font-size:15px;
-    padding:11px 12px;
-    border:1.5px solid var(--line);
-    border-radius:9px;
-    background:var(--paper);
-    color:var(--ink);
-    outline:none;
-    transition:border-color .15s ease, background .15s ease;
-  }
-  input[type=text]:focus, input[type=tel]:focus, select:focus, input[type=number]:focus{
-    border-color:var(--indigo);
-    background:#fff;
-  }
-  .field{ margin-bottom:14px; }
-  .row2{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:12px;
-  }
+// Lajur tambahan: ditambah automatik di hujung jika belum ada.
+const OPTIONAL_HEADERS = ['SubmissionID'];
 
-  /* ---------- Garment tag (signature element) ---------- */
-  #items{
-    display:flex;
-    flex-direction:column;
-    gap:22px;
-    margin-bottom:6px;
-  }
-  .tag{
-    position:relative;
-    background:var(--paper);
-    border:1.5px solid var(--line);
-    border-radius:10px 10px 4px 4px;
-    padding:16px 16px 18px;
-  }
-  .tag::after{
-    content:"";
-    position:absolute;
-    left:0; right:0; bottom:-9px;
-    height:10px;
-    background:
-      linear-gradient(135deg, var(--paper-raised) 50%, transparent 50%) 0 0/14px 14px,
-      linear-gradient(-135deg, var(--paper-raised) 50%, transparent 50%) 0 0/14px 14px;
-    background-color:var(--paper);
-    background-position: bottom left, bottom left;
-  }
-  .tag-head{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    margin-bottom:12px;
-  }
-  .tag-num{
-    font-family:'IBM Plex Mono',monospace;
-    font-size:12px;
-    color:var(--ink-soft);
-    display:flex;
-    align-items:center;
-    gap:6px;
-  }
-  .tag-num .hole{
-    width:10px;height:10px;
-    border-radius:50%;
-    background:var(--paper-raised);
-    border:1.5px solid var(--line);
-    display:inline-block;
-  }
-  .remove-btn{
-    border:none;
-    background:none;
-    color:var(--danger);
-    font-size:12px;
-    font-weight:600;
-    font-family:'Inter',sans-serif;
-    cursor:pointer;
-    padding:4px 6px;
-    border-radius:6px;
-  }
-  .remove-btn:hover{ background:rgba(200,16,46,0.12); }
+const TEXT_COLUMNS = [
+  'CustomerName', 'OrderDisplayName', 'WhatsApp', 'CustomerNotes', 'SubmissionID'
+];
 
-  .tag-grid{
-    display:grid;
-    grid-template-columns:1.1fr 0.8fr 0.7fr;
-    gap:10px;
-  }
-  @media (max-width:420px){
-    .tag-grid{ grid-template-columns:1fr; }
-  }
-  .tag-grid label{ font-size:11.5px; color:var(--ink-soft); font-weight:600; text-transform:uppercase; letter-spacing:0.04em; margin-bottom:5px;}
 
-  .add-btn{
-    width:100%;
-    margin-top:14px;
-    padding:12px;
-    border:1.5px dashed var(--indigo);
-    border-radius:10px;
-    background:transparent;
-    color:var(--indigo);
-    font-family:'Inter',sans-serif;
-    font-weight:600;
-    font-size:14px;
-    cursor:pointer;
-    transition:background .15s ease;
-  }
-  .add-btn:hover{ background:rgba(200,16,46,0.08); }
+/* =====================================================
+   WEB APP
+===================================================== */
 
-  /* ---------- Submit ---------- */
-  .submit-btn{
-    width:100%;
-    margin-top:22px;
-    padding:15px;
-    border:none;
-    border-radius:10px;
-    background:var(--indigo);
-    color:#fff;
-    font-family:'Space Grotesk',sans-serif;
-    font-weight:700;
-    font-size:16px;
-    letter-spacing:0.01em;
-    cursor:pointer;
-    transition:background .15s ease, transform .1s ease;
-  }
-  .submit-btn:hover{ background:var(--indigo-deep); }
-  .submit-btn:active{ transform:scale(0.99); }
-  .submit-btn:disabled{ opacity:0.6; cursor:not-allowed; }
+function doGet() {
+  return HtmlService.createHtmlOutput(`
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>AD Project Website Orders</title>
+      </head>
+      <body style="font-family:Arial,sans-serif;padding:30px;text-align:center">
+        <h2>AD Project Website Orders</h2>
+        <p>Endpoint penerimaan tempahan telah tersedia.</p>
+        <p>Halaman ini tidak memaparkan rekod pelanggan.</p>
+      </body>
+    </html>
+  `).setTitle('AD Project Website Orders');
+}
 
-  .status{
-    margin-top:14px;
-    font-size:14px;
-    text-align:center;
-    display:none;
-    border-radius:10px;
-    padding:12px 14px;
-  }
-  .status.show{ display:block; }
-  .status.success{ background:rgba(46,125,50,0.14); color:#5FCB66; }
-  .status.error{ background:rgba(200,16,46,0.14); color:#FF6B7A; }
-  .status.loading{ background:rgba(245,242,234,0.12); color:var(--ink); }
 
-  .order-id{
-    font-family:'IBM Plex Mono',monospace;
-    font-weight:600;
-  }
-
-  footer{
-    text-align:center;
-    margin-top:26px;
-    font-size:12px;
-    color:#8C887F;
-  }
-
-  /* ---------- Modal Popup ---------- */
-  .modal-overlay{
-    display:none;
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,0.85);
-    z-index:1000;
-    align-items:center;
-    justify-content:center;
-    padding:20px;
-    backdrop-filter:blur(4px);
-    -webkit-backdrop-filter:blur(4px);
-  }
-  .modal-overlay.show{ display:flex; animation:fadeIn .25s ease; }
-
-  @keyframes fadeIn{
-    from{ opacity:0; }
-    to{ opacity:1; }
-  }
-  @keyframes slideUp{
-    from{ opacity:0; transform:translateY(30px) scale(0.97); }
-    to{ opacity:1; transform:translateY(0) scale(1); }
-  }
-
-  .modal{
-    background:#1A1816;
-    border:1px solid #3A3430;
-    border-radius:18px;
-    width:100%;
-    max-width:420px;
-    max-height:88vh;
-    overflow-y:auto;
-    box-shadow:0 25px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(200,16,46,0.2);
-    animation:slideUp .3s cubic-bezier(0.34,1.56,0.64,1);
-  }
-
-  .modal-header{
-    background:linear-gradient(135deg, var(--indigo-deep), #5A0010);
-    border-radius:18px 18px 0 0;
-    padding:22px 22px 18px;
-    text-align:center;
-    position:relative;
-  }
-  .modal-header .check-icon{
-    font-size:42px;
-    display:block;
-    margin-bottom:8px;
-    animation:popIn .4s cubic-bezier(0.34,1.56,0.64,1) .1s both;
-  }
-  @keyframes popIn{
-    from{ transform:scale(0); opacity:0; }
-    to{ transform:scale(1); opacity:1; }
-  }
-  .modal-header h2{
-    font-family:'Black Ops One',sans-serif;
-    font-size:20px;
-    color:#fff;
-    margin:0 0 4px;
-    letter-spacing:0.02em;
-  }
-  .modal-header p{
-    font-size:12px;
-    color:rgba(255,255,255,0.7);
-    margin:0;
-    font-family:'IBM Plex Mono',monospace;
-    letter-spacing:0.05em;
-  }
-
-  .modal-body{
-    padding:20px 22px;
-  }
-
-  .modal-ref{
-    background:rgba(200,16,46,0.12);
-    border:1px solid rgba(200,16,46,0.25);
-    border-radius:10px;
-    padding:10px 14px;
-    margin-bottom:18px;
-    text-align:center;
-  }
-  .modal-ref .ref-label{
-    font-size:11px;
-    color:#A8A39A;
-    font-family:'IBM Plex Mono',monospace;
-    letter-spacing:0.1em;
-    text-transform:uppercase;
-  }
-  .modal-ref .ref-num{
-    font-family:'IBM Plex Mono',monospace;
-    font-size:18px;
-    font-weight:600;
-    color:#F5F2EA;
-    letter-spacing:0.08em;
-  }
-
-  .modal-section-title{
-    font-size:11px;
-    font-family:'IBM Plex Mono',monospace;
-    letter-spacing:0.12em;
-    text-transform:uppercase;
-    color:#A8A39A;
-    margin:0 0 8px;
-  }
-
-  .modal-info{
-    background:#0F0E0D;
-    border:1px solid #2A2724;
-    border-radius:10px;
-    padding:14px;
-    margin-bottom:16px;
-  }
-  .modal-info-row{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:5px 0;
-    border-bottom:1px solid #1E1C1A;
-  }
-  .modal-info-row:last-child{ border-bottom:none; }
-  .modal-info-row .label{
-    font-size:12px;
-    color:#A8A39A;
-    font-weight:500;
-  }
-  .modal-info-row .value{
-    font-size:13px;
-    color:#F5F2EA;
-    font-weight:600;
-    text-align:right;
-  }
-
-  .modal-items{
-    background:#0F0E0D;
-    border:1px solid #2A2724;
-    border-radius:10px;
-    overflow:hidden;
-    margin-bottom:16px;
-  }
-  .modal-item{
-    display:flex;
-    align-items:center;
-    gap:12px;
-    padding:12px 14px;
-    border-bottom:1px solid #1E1C1A;
-  }
-  .modal-item:last-child{ border-bottom:none; }
-  .modal-item-num{
-    width:24px;
-    height:24px;
-    border-radius:50%;
-    background:var(--indigo);
-    color:#fff;
-    font-size:11px;
-    font-weight:700;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    flex-shrink:0;
-  }
-  .modal-item-info{
-    flex:1;
-  }
-  .modal-item-info .jenis{
-    font-size:13px;
-    font-weight:700;
-    color:#F5F2EA;
-  }
-  .modal-item-info .saiz{
-    font-size:12px;
-    color:#A8A39A;
-    margin-top:1px;
-  }
-  .modal-item-qty{
-    background:rgba(200,16,46,0.15);
-    border:1px solid rgba(200,16,46,0.3);
-    border-radius:6px;
-    padding:3px 10px;
-    font-size:13px;
-    font-weight:700;
-    color:var(--indigo);
-    font-family:'IBM Plex Mono',monospace;
-  }
-
-  .modal-total{
-    background:linear-gradient(135deg, rgba(200,16,46,0.15), rgba(142,11,32,0.1));
-    border:1px solid rgba(200,16,46,0.3);
-    border-radius:10px;
-    padding:14px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:20px;
-  }
-  .modal-total .total-label{
-    font-size:13px;
-    font-weight:700;
-    color:#F5F2EA;
-    font-family:'Space Grotesk',sans-serif;
-  }
-  .modal-total .total-val{
-    font-family:'Black Ops One',sans-serif;
-    font-size:22px;
-    color:var(--indigo);
-    letter-spacing:0.02em;
-  }
-  .modal-total .total-unit{
-    font-size:12px;
-    color:#A8A39A;
-    font-family:'IBM Plex Mono',monospace;
-  }
-
-  .modal-close-btn{
-    width:100%;
-    padding:14px;
-    border:none;
-    border-radius:10px;
-    background:var(--indigo);
-    color:#fff;
-    font-family:'Space Grotesk',sans-serif;
-    font-weight:700;
-    font-size:15px;
-    cursor:pointer;
-    transition:background .15s ease;
-    letter-spacing:0.02em;
-  }
-  .modal-close-btn:hover{ background:var(--indigo-deep); }
-</style>
-</head>
-<body>
-
-<div class="wrap">
-
-  <div class="hero">
-    <div class="eyebrow">Borang Tempahan</div>
-    <h1>HELLO TRKIAN!</h1>
-    <p>Isi maklumat di bawah untuk tempah jersi TRK On Tour. Boleh tambah lebih daripada satu jenis dan saiz dalam tempahan yang sama.</p>
-  </div>
-
-  <div class="posters">
-    <img class="poster" src="https://raw.githubusercontent.com/adminadproject/TRK/refs/heads/main/POSTER%20TRK%20COMPLETE.png" alt="Poster TRK On Tour - Jersi Retro Collar">
-    <img class="poster" src="https://raw.githubusercontent.com/adminadproject/TRK/refs/heads/main/UKURAN%20BAJU.png" alt="Carta Saiz Baju">
-  </div>
-
-  <div class="card">
-
-    <p class="section-label">Maklumat Pelanggan</p>
-    <div class="field">
-      <label for="nama">Nama Penuh</label>
-      <input type="text" id="nama" placeholder="Contoh: Ahmad Bin Ali" required>
-    </div>
-    <div class="field" style="margin-bottom:22px;">
-      <label for="telefon">No. Telefon</label>
-      <input type="tel" id="telefon" placeholder="Contoh: 012-3456789" required>
-    </div>
-
-    <p class="section-label">Pesanan Tempahan</p>
-    <div id="items"></div>
-
-    <button type="button" class="add-btn" id="addItemBtn">+ Tambah Pesanan Lain</button>
-
-    <button type="button" class="submit-btn" id="submitBtn">Hantar Order</button>
-
-    <div class="status" id="status"></div>
-
-  </div>
-
-  <footer>Maklumat akan dihantar terus ke sistem tempahan kami.</footer>
-
-</div>
-
-<!-- Modal Summary Order -->
-<div class="modal-overlay" id="modalOverlay">
-  <div class="modal">
-    <div class="modal-header">
-      <span class="check-icon">✅</span>
-      <h2>ORDER BERJAYA!</h2>
-      <p id="modalTimestamp"></p>
-    </div>
-    <div class="modal-body">
-      <div class="modal-ref">
-        <div class="ref-label">No. Rujukan</div>
-        <div class="ref-num" id="modalRefNum">—</div>
-      </div>
-
-      <div class="modal-section-title">Maklumat Pelanggan</div>
-      <div class="modal-info">
-        <div class="modal-info-row">
-          <span class="label">Nama</span>
-          <span class="value" id="modalNama">—</span>
-        </div>
-        <div class="modal-info-row">
-          <span class="label">No. Telefon</span>
-          <span class="value" id="modalTelefon">—</span>
-        </div>
-      </div>
-
-      <div class="modal-section-title">Senarai Pesanan</div>
-      <div class="modal-items" id="modalItems"></div>
-
-      <div class="modal-total">
-        <div>
-          <div class="total-label">Jumlah Helai</div>
-          <div class="total-unit">Keseluruhan Order</div>
-        </div>
-        <div class="total-val" id="modalTotal">0</div>
-      </div>
-
-      <button class="modal-close-btn" id="modalCloseBtn">Tutup</button>
-    </div>
-  </div>
-</div>
-
-<script>
-  // ============================================================
-  // KONFIGURASI — tukar URL ini kepada URL Web App Google Apps Script anda
-  // ============================================================
-  const GOOGLE_SHEET_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbyIS1d5O2p5xXMvgjA2GOcNWPRxdwDCfJjHOlhSOVpVh2qWfwYpu7S_JutrEInaDrg2/exec";
-
-  // Tukar senarai ini ikut produk sebenar kedai anda
-  const JENIS_OPTIONS = ["ROUNDNECK", "RETRO", "ROUNDNECK LP", "RETRO LP", "MUSLIMAH"];
-  const SAIZ_OPTIONS = ["XS", "S", "M", "L", "XL", "XXL", "3XL", "4XL", "5XL", "6XL", "7XL", "8XL", "9XL", "K28", "K30", "K32", "K34", "K36", "K38"];
-
-  let itemCount = 0;
-
-  function createItemRow() {
-    itemCount++;
-    const id = itemCount;
-    const div = document.createElement("div");
-    div.className = "tag";
-    div.dataset.id = id;
-
-    div.innerHTML = `
-      <div class="tag-head">
-        <span class="tag-num"><span class="hole"></span> Pesanan ${String(id).padStart(2,"0")}</span>
-        <button type="button" class="remove-btn" data-remove="${id}">Buang</button>
-      </div>
-      <div class="tag-grid">
-        <div>
-          <label>Jenis</label>
-          <select class="f-jenis">
-            ${JENIS_OPTIONS.map(j => `<option value="${j}">${j}</option>`).join("")}
-          </select>
-        </div>
-        <div>
-          <label>Saiz</label>
-          <select class="f-saiz">
-            ${SAIZ_OPTIONS.map(s => `<option value="${s}">${s}</option>`).join("")}
-          </select>
-        </div>
-        <div>
-          <label>Kuantiti</label>
-          <input type="number" class="f-kuantiti" min="1" value="1">
-        </div>
-      </div>
-    `;
-    return div;
-  }
-
-  const itemsContainer = document.getElementById("items");
-
-  function addItem() {
-    const row = createItemRow();
-    itemsContainer.appendChild(row);
-    refreshRemoveButtons();
-  }
-
-  function refreshRemoveButtons() {
-    const rows = itemsContainer.querySelectorAll(".tag");
-    rows.forEach(row => {
-      const btn = row.querySelector(".remove-btn");
-      btn.style.visibility = rows.length > 1 ? "visible" : "hidden";
-    });
-  }
-
-  itemsContainer.addEventListener("click", (e) => {
-    if (e.target.matches("[data-remove]")) {
-      const id = e.target.getAttribute("data-remove");
-      const row = itemsContainer.querySelector(`.tag[data-id="${id}"]`);
-      if (row) row.remove();
-      refreshRemoveButtons();
-    }
-  });
-
-  document.getElementById("addItemBtn").addEventListener("click", addItem);
-
-  // Mula dengan satu item
-  addItem();
-
-  // ---------------- Modal ----------------
-  const modalOverlay = document.getElementById("modalOverlay");
-  document.getElementById("modalCloseBtn").addEventListener("click", () => {
-    modalOverlay.classList.remove("show");
-    document.body.style.overflow = "";
-  });
-  modalOverlay.addEventListener("click", (e) => {
-    if (e.target === modalOverlay) {
-      modalOverlay.classList.remove("show");
-      document.body.style.overflow = "";
-    }
-  });
-
-  function showModal(nama, telefon, items, orderId) {
-    document.getElementById("modalRefNum").textContent = orderId;
-    document.getElementById("modalNama").textContent = nama;
-    document.getElementById("modalTelefon").textContent = telefon;
-
-    // Timestamp
-    const now = new Date();
-    const ts = now.toLocaleDateString("ms-MY", {day:"2-digit",month:"long",year:"numeric"})
-      + " • " + now.toLocaleTimeString("ms-MY", {hour:"2-digit",minute:"2-digit"});
-    document.getElementById("modalTimestamp").textContent = ts;
-
-    // Senarai item
-    const container = document.getElementById("modalItems");
-    container.innerHTML = "";
-    let totalHelai = 0;
-    items.forEach((item, idx) => {
-      totalHelai += item.kuantiti;
-      const div = document.createElement("div");
-      div.className = "modal-item";
-      div.innerHTML = `
-        <div class="modal-item-num">${idx + 1}</div>
-        <div class="modal-item-info">
-          <div class="jenis">${item.jenis}</div>
-          <div class="saiz">Saiz: ${item.saiz}</div>
-        </div>
-        <div class="modal-item-qty">x${item.kuantiti}</div>
-      `;
-      container.appendChild(div);
-    });
-
-    document.getElementById("modalTotal").textContent = totalHelai + " helai";
-    modalOverlay.classList.add("show");
-    document.body.style.overflow = "hidden";
-  }
-
-  // ---------------- Submit ----------------
-  const statusEl = document.getElementById("status");
-  const submitBtn = document.getElementById("submitBtn");
-
-  function setStatus(type, html) {
-    statusEl.className = "status show " + type;
-    statusEl.innerHTML = html;
-  }
-
-  document.getElementById("submitBtn").addEventListener("click", async () => {
-    const nama = document.getElementById("nama").value.trim();
-    const telefon = document.getElementById("telefon").value.trim();
-
-    if (!nama || !telefon) {
-      setStatus("error", "Sila isi nama dan no. telefon.");
-      return;
+function doPost(e) {
+  try {
+    if (!e || !e.parameter) {
+      throw userError_('Data tempahan tidak diterima.');
     }
 
-    const rows = itemsContainer.querySelectorAll(".tag");
-    const items = Array.from(rows).map(row => ({
-      jenis: row.querySelector(".f-jenis").value,
-      saiz: row.querySelector(".f-saiz").value,
-      kuantiti: parseInt(row.querySelector(".f-kuantiti").value, 10) || 1
-    }));
-
-    if (items.length === 0) {
-      setStatus("error", "Sila tambah sekurang-kurangnya satu pesanan.");
-      return;
-    }
-
-    // Kembangkan setiap item ikut kuantiti - 1 row dalam sheet = 1 helai/seluar
-    const rowsToSend = [];
-    items.forEach(item => {
-      for (let i = 0; i < item.kuantiti; i++) {
-        rowsToSend.push({ jenis: item.jenis, saiz: item.saiz });
-      }
-    });
-
-    const orderId = Date.now().toString(36).toUpperCase();
-    const payload = { orderId, nama, telefon, rows: rowsToSend };
-
-    submitBtn.disabled = true;
-    setStatus("loading", "Menghantar order anda...");
-
-    try {
-      if (!GOOGLE_SHEET_WEBAPP_URL || GOOGLE_SHEET_WEBAPP_URL.indexOf("http") !== 0) {
-        throw new Error("URL Google Sheet belum dikonfigurasi.");
-      }
-
-      await fetch(GOOGLE_SHEET_WEBAPP_URL, {
-        method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify(payload)
+    // Honeypot anti-spam: pulang "berjaya" tanpa menyimpan supaya bot tidak belajar.
+    if (String(e.parameter.website || '').trim() !== '') {
+      return createResultPage_({
+        success: true,
+        message: 'Tempahan anda berjaya diterima oleh AD Project.'
       });
+    }
 
-      const totalHelai = rowsToSend.length;
-      setStatus("success", `Order diterima! (${totalHelai} helai) — No. Rujukan: <span class="order-id">${orderId}</span>`);
-      showModal(nama, telefon, items, orderId);
+    const order = validateAndPrepareOrder_(e.parameter);
+    const savedOrder = saveOrder_(order);
 
-      // Reset borang
-      document.getElementById("nama").value = "";
-      document.getElementById("telefon").value = "";
-      itemsContainer.innerHTML = "";
-      itemCount = 0;
-      addItem();
+    return createResultPage_({
+      success: true,
+      message: 'Tempahan anda berjaya diterima oleh AD Project.',
+      leadId: savedOrder.leadId
+    });
 
-    } catch (err) {
-      setStatus("error", "Maaf, order gagal dihantar. Sila cuba lagi atau hubungi kami terus.");
-      console.error(err);
-    } finally {
-      submitBtn.disabled = false;
+  } catch (error) {
+    console.error(error && error.stack ? error.stack : error);
+
+    // Hanya mesej validasi dipaparkan; ralat sistem diberi mesej umum.
+    return createResultPage_({
+      success: false,
+      message: error && error.isUserError ? error.message : CONFIG.GENERIC_ERROR
+    });
+  }
+}
+
+
+function userError_(message) {
+  const err = new Error(message);
+  err.isUserError = true;
+  return err;
+}
+
+
+/**
+ * Respons ini menghantar status kepada halaman borang.
+ * Borang mendengar mesej AD_PROJECT_ORDER_RESULT.
+ */
+function createResultPage_(result) {
+  const payload = JSON.stringify({
+    type: 'AD_PROJECT_ORDER_RESULT',
+    success: Boolean(result.success),
+    message: String(result.message || ''),
+    leadId: String(result.leadId || '')
+  }).replace(/</g, '\\u003c');
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>AD Project</title>
+      </head>
+      <body style="font-family:Arial,sans-serif;text-align:center;padding:20px">
+        <p>${result.success
+          ? 'Tempahan telah diproses.'
+          : 'Tempahan tidak dapat diproses.'}</p>
+
+        <script>
+          (function () {
+            var result = ${payload};
+
+            try {
+              window.parent.postMessage(result, '*');
+            } catch (err) {}
+
+            try {
+              if (window.top && window.top !== window.parent) {
+                window.top.postMessage(result, '*');
+              }
+            } catch (err) {}
+          })();
+        </script>
+      </body>
+    </html>
+  `;
+
+  return HtmlService.createHtmlOutput(html)
+    .setTitle('AD Project - Status Tempahan');
+}
+
+
+/* =====================================================
+   VALIDATION
+===================================================== */
+
+function validateAndPrepareOrder_(p) {
+  const settings = getSettingsMap_();
+  const minQty = Number(settings.MinimumQty) > 0
+    ? Number(settings.MinimumQty)
+    : CONFIG.MINIMUM_QTY;
+
+  const customerName = cleanText_(p.customerName, 150);
+  const whatsapp = normalizePhone_(p.whatsapp);
+  const shirtType = normalizeShirtType_(p.shirtType);
+  const quantity = Number(String(p.quantity || '').trim());
+  const dateNeededText = String(p.dateNeeded || '').trim();
+  const customerNotes = cleanText_(p.customerNotes, 2000);
+  const submissionId = cleanSubmissionId_(p.submissionId);
+
+  if (!customerName) {
+    throw userError_('Sila masukkan nama anda.');
+  }
+
+  if (!/^01\d{7,8}$/.test(whatsapp)) {
+    throw userError_('Sila masukkan nombor mobile Malaysia yang sah, contoh 0123456789.');
+  }
+
+  if (!shirtType) {
+    throw userError_('Sila pilih jenis baju.');
+  }
+
+  if (
+    !Number.isInteger(quantity) ||
+    quantity < minQty ||
+    quantity > CONFIG.MAXIMUM_QTY
+  ) {
+    throw userError_(
+      'Kuantiti minimum ialah ' + minQty +
+      ' helai. Sila semak kuantiti anda.'
+    );
+  }
+
+  const dateNeeded = parseRequiredDate_(dateNeededText);
+  const unitPrice = getUnitPrice_(shirtType, quantity); // ralat di sini = masalah sistem
+  const estimatedTotal = unitPrice * quantity;
+
+  if (!Number.isFinite(estimatedTotal)) {
+    throw new Error('Jumlah anggaran tidak sah.');
+  }
+
+  return {
+    customerName: customerName,
+    whatsapp: whatsapp,
+    shirtType: shirtType,
+    quantity: quantity,
+    dateNeeded: dateNeeded,
+    unitPrice: unitPrice,
+    estimatedTotal: estimatedTotal,
+    customerNotes: customerNotes,
+    submissionId: submissionId
+  };
+}
+
+
+function cleanText_(value, maxLength) {
+  return String(value == null ? '' : value)
+    .replace(/[\u0000-\u001F\u007F]/g, ' ')
+    .trim()
+    .slice(0, maxLength);
+}
+
+
+function cleanSubmissionId_(value) {
+  const v = String(value || '').trim();
+  return /^[A-Za-z0-9-]{8,64}$/.test(v) ? v : '';
+}
+
+
+/**
+ * Pulangkan format 01XXXXXXXX (format backoffice).
+ * 60123456789 -> 0123456789.
+ */
+function normalizePhone_(value) {
+  let digits = String(value == null ? '' : value).replace(/\D/g, '');
+
+  if (digits.indexOf('60') === 0) {
+    digits = '0' + digits.slice(2);
+  }
+
+  return digits;
+}
+
+
+function normalizeShirtType_(value) {
+  const v = String(value || '').trim().toLowerCase();
+
+  const aliases = {
+    'roundneck': 'Roundneck',
+    'round neck': 'Roundneck',
+    'round-neck': 'Roundneck',
+    'polo': 'Polo',
+    'muslimah': 'Muslimah'
+  };
+
+  return aliases[v] || '';
+}
+
+
+function parseRequiredDate_(value) {
+  // HTML date input menghantar YYYY-MM-DD.
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    throw userError_('Sila pilih tarikh diperlukan yang sah.');
+  }
+
+  // Tengah hari waktu Malaysia, tanpa bergantung pada zon waktu projek.
+  const date = Utilities.parseDate(
+    value + ' 12:00',
+    CONFIG.TIMEZONE,
+    'yyyy-MM-dd HH:mm'
+  );
+
+  // Tolak tarikh mustahil seperti 2026-02-30 (parseDate akan "membundar").
+  if (Utilities.formatDate(date, CONFIG.TIMEZONE, 'yyyy-MM-dd') !== value) {
+    throw userError_('Tarikh diperlukan tidak sah.');
+  }
+
+  const todayText = Utilities.formatDate(
+    new Date(),
+    CONFIG.TIMEZONE,
+    'yyyy-MM-dd'
+  );
+
+  if (value < todayText) {
+    throw userError_('Tarikh diperlukan tidak boleh sebelum hari ini.');
+  }
+
+  return date;
+}
+
+
+/* =====================================================
+   SAVE ORDER
+===================================================== */
+
+function saveOrder_(order) {
+  const lock = LockService.getScriptLock();
+  lock.waitLock(30000);
+
+  try {
+    const ss = SpreadsheetApp.openById(CONFIG.SPREADSHEET_ID);
+    const sheet = ss.getSheetByName(CONFIG.ORDERS_SHEET);
+
+    if (!sheet) {
+      throw new Error('Tab WebsiteOrders tidak ditemui.');
+    }
+
+    ensureOrderHeaders_(sheet);
+
+    const headers = getHeaders_(sheet);
+
+    // Elak tempahan berganda: SubmissionID yang sama = tempahan yang sama.
+    if (order.submissionId) {
+      const dup = findBySubmissionId_(sheet, headers, order.submissionId);
+      if (dup) return { leadId: dup, row: 0, duplicate: true };
+    }
+
+    const settings = getSettingsMap_();
+    const prefix = String(
+      settings.LeadPrefix || CONFIG.LEAD_PREFIX
+    ).trim();
+
+    const digits = Math.max(
+      1,
+      Number(settings.LeadDigits || CONFIG.LEAD_DIGITS)
+    );
+
+    const nextNumber = Math.max(
+      Number(settings.NextLeadNumber || 1),
+      getHighestLeadNumber_(sheet, prefix) + 1
+    );
+
+    const leadId = prefix + String(nextNumber).padStart(digits, '0');
+    const now = new Date();
+
+    const rowObject = {
+      WebsiteLeadID: leadId,
+      CreatedAt: now,
+      CustomerName: order.customerName,
+      OrderDisplayName: order.customerName + ' (' + leadId + ')',
+      WhatsApp: order.whatsapp,
+      ShirtType: order.shirtType,
+      Quantity: order.quantity,
+      DateNeeded: order.dateNeeded,
+      UnitPrice: order.unitPrice,
+      EstimatedTotal: order.estimatedTotal,
+      CustomerNotes: order.customerNotes,
+      LeadStatus: 'BAHARU',
+      ImportStatus: 'BELUM DIIMPORT',
+      BackofficeOrderID: '',
+      ImportedAt: '',
+      LastUpdatedAt: now,
+      SubmissionID: order.submissionId
+    };
+
+    const row = headers.map(function (header) {
+      return Object.prototype.hasOwnProperty.call(rowObject, header)
+        ? rowObject[header]
+        : '';
+    });
+
+    const newRow = sheet.getLastRow() + 1;
+
+    if (newRow > sheet.getMaxRows()) {
+      sheet.insertRowsAfter(sheet.getMaxRows(), 100);
+    }
+
+    // Format DULU (teks biasa untuk WhatsApp/nama/nota), kemudian tulis nilai.
+    formatOrderRow_(sheet, newRow, headers);
+
+    sheet.getRange(newRow, 1, 1, row.length).setValues([row]);
+
+    SpreadsheetApp.flush();
+
+    setSettingValue_('NextLeadNumber', nextNumber + 1);
+
+    return {
+      leadId: leadId,
+      row: newRow
+    };
+
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+
+function findBySubmissionId_(sheet, headers, submissionId) {
+  const idCol = headers.indexOf('SubmissionID') + 1;
+  const leadCol = headers.indexOf('WebsiteLeadID') + 1;
+  const lastRow = sheet.getLastRow();
+
+  if (idCol < 1 || leadCol < 1 || lastRow < 2) return '';
+
+  const ids = sheet.getRange(2, idCol, lastRow - 1, 1).getDisplayValues();
+
+  for (let i = ids.length - 1; i >= 0; i--) {
+    if (String(ids[i][0]).trim() === submissionId) {
+      return String(sheet.getRange(i + 2, leadCol).getDisplayValue()).trim();
+    }
+  }
+
+  return '';
+}
+
+
+/* =====================================================
+   PRICING
+===================================================== */
+
+function getUnitPrice_(shirtType, quantity) {
+  const ss = SpreadsheetApp.openById(CONFIG.SPREADSHEET_ID);
+  const sheet = ss.getSheetByName(CONFIG.PRICING_SHEET);
+
+  if (!sheet || sheet.getLastRow() < 2) {
+    throw new Error('Jadual harga PricingRules belum tersedia.');
+  }
+
+  const values = sheet.getDataRange().getValues();
+  const headers = values[0].map(function (h) {
+    return normalizeHeader_(h);
+  });
+
+  const minCol = findHeaderIndex_(headers, [
+    'minqty', 'minimumqty', 'minquantity', 'minimumquantity'
+  ]);
+  const maxCol = findHeaderIndex_(headers, [
+    'maxqty', 'maximumqty', 'maxquantity', 'maximumquantity'
+  ]);
+
+  const typeColumnAliases = {
+    'Roundneck': ['roundneck', 'roundneckprice', 'roundneckunitprice'],
+    'Polo': ['polo', 'poloprice', 'polounitprice'],
+    'Muslimah': ['muslimah', 'muslimahprice', 'muslimahunitprice']
+  };
+
+  const priceCol = findHeaderIndex_(
+    headers,
+    typeColumnAliases[shirtType]
+  );
+
+  if (minCol < 0 || maxCol < 0 || priceCol < 0) {
+    throw new Error(
+      'Semak tajuk kolum PricingRules. ' +
+      'Perlu ada MinQty, MaxQty, Roundneck, Polo dan Muslimah.'
+    );
+  }
+
+  for (let i = 1; i < values.length; i++) {
+    const min = Number(values[i][minCol]);
+    const maxRaw = values[i][maxCol];
+    const price = Number(values[i][priceCol]);
+
+    const max = (
+      maxRaw === '' ||
+      maxRaw === null ||
+      String(maxRaw).trim() === ''
+    ) ? Infinity : Number(maxRaw);
+
+    if (
+      Number.isFinite(min) &&
+      quantity >= min &&
+      quantity <= max &&
+      Number.isFinite(price) &&
+      price > 0
+    ) {
+      return price;
+    }
+  }
+
+  throw new Error(
+    'Harga bagi kuantiti ini tidak ditemui dalam PricingRules.'
+  );
+}
+
+
+/* =====================================================
+   SHEET STRUCTURE & FORMATTING
+===================================================== */
+
+function setupWebsiteOrdersSpreadsheet() {
+  const ss = SpreadsheetApp.openById(CONFIG.SPREADSHEET_ID);
+
+  let orders = ss.getSheetByName(CONFIG.ORDERS_SHEET);
+  if (!orders) {
+    orders = ss.insertSheet(CONFIG.ORDERS_SHEET);
+  }
+
+  ensureOrderHeaders_(orders);
+  ensureSettingsSheet_(ss);
+  ensurePricingSheet_(ss);
+  setUKDateTimeFormat();
+  setTextColumnFormats_();
+
+  return 'Persediaan selesai.';
+}
+
+
+/** Jalankan sekali untuk menetapkan format teks pada lajur WhatsApp, nama dan nota. */
+function setTextColumnFormats_() {
+  const ss = SpreadsheetApp.openById(CONFIG.SPREADSHEET_ID);
+  const sheet = ss.getSheetByName(CONFIG.ORDERS_SHEET);
+
+  if (!sheet || sheet.getLastColumn() === 0) return;
+
+  const headers = getHeaders_(sheet);
+
+  TEXT_COLUMNS.forEach(function (name) {
+    const col = headers.indexOf(name) + 1;
+    if (col > 0) {
+      sheet.getRange(2, col, sheet.getMaxRows() - 1, 1).setNumberFormat('@');
     }
   });
-</script>
+}
 
-</body>
-</html>
+
+function ensureOrderHeaders_(sheet) {
+  if (sheet.getLastRow() === 0 || sheet.getLastColumn() === 0) {
+    sheet.getRange(1, 1, 1, ORDER_HEADERS.length + OPTIONAL_HEADERS.length)
+      .setValues([ORDER_HEADERS.concat(OPTIONAL_HEADERS)]);
+    sheet.setFrozenRows(1);
+    return;
+  }
+
+  let headers = getHeaders_(sheet);
+
+  // Tambah DateNeeded selepas Quantity jika belum ada.
+  if (headers.indexOf('DateNeeded') === -1) {
+    const quantityIndex = headers.indexOf('Quantity');
+
+    if (quantityIndex === -1) {
+      throw new Error(
+        'Kolum Quantity tidak ditemui. Semak tajuk WebsiteOrders.'
+      );
+    }
+
+    sheet.insertColumnAfter(quantityIndex + 1);
+    sheet.getRange(1, quantityIndex + 2).setValue('DateNeeded');
+    headers = getHeaders_(sheet);
+  }
+
+  const missing = ORDER_HEADERS.filter(function (h) {
+    return headers.indexOf(h) === -1;
+  });
+
+  if (missing.length) {
+    throw new Error(
+      'Tajuk kolum WebsiteOrders tidak lengkap: ' + missing.join(', ')
+    );
+  }
+
+  // Lajur pilihan (cth. SubmissionID) ditambah di hujung jika belum ada.
+  OPTIONAL_HEADERS.forEach(function (h) {
+    if (headers.indexOf(h) === -1) {
+      const nextCol = sheet.getLastColumn() + 1;
+      if (nextCol > sheet.getMaxColumns()) {
+        sheet.insertColumnAfter(sheet.getMaxColumns());
+      }
+      sheet.getRange(1, nextCol).setValue(h);
+      headers.push(h);
+    }
+  });
+
+  sheet.setFrozenRows(1);
+}
+
+
+function ensureSettingsSheet_(ss) {
+  let sheet = ss.getSheetByName(CONFIG.SETTINGS_SHEET);
+  if (!sheet) {
+    sheet = ss.insertSheet(CONFIG.SETTINGS_SHEET);
+  }
+
+  if (sheet.getLastRow() === 0) {
+    sheet.getRange(1, 1, 1, 2).setValues([['Setting', 'Value']]);
+  }
+
+  const settings = getSettingsMap_();
+
+  const defaults = {
+    LeadPrefix: CONFIG.LEAD_PREFIX,
+    LeadDigits: CONFIG.LEAD_DIGITS,
+    NextLeadNumber: 1,
+    MinimumQty: CONFIG.MINIMUM_QTY
+  };
+
+  Object.keys(defaults).forEach(function (key) {
+    if (
+      !Object.prototype.hasOwnProperty.call(settings, key) ||
+      settings[key] === ''
+    ) {
+      setSettingValue_(key, defaults[key]);
+    }
+  });
+}
+
+
+function ensurePricingSheet_(ss) {
+  let sheet = ss.getSheetByName(CONFIG.PRICING_SHEET);
+  if (!sheet) {
+    sheet = ss.insertSheet(CONFIG.PRICING_SHEET);
+  }
+
+  if (sheet.getLastRow() === 0) {
+    sheet.getRange(1, 1, 1, 5).setValues([[
+      'MinQty', 'MaxQty', 'Roundneck', 'Polo', 'Muslimah'
+    ]]);
+
+    sheet.getRange(2, 1, 6, 5).setValues([
+      [10, 29, 22, 24, 29],
+      [30, 100, 20, 22, 27],
+      [101, 300, 18, 20, 25],
+      [301, 500, 16, 18, 23],
+      [501, 1000, 15, 17, 22],
+      [1001, '', 13, 15, 20]
+    ]);
+  }
+}
+
+
+function setUKDateTimeFormat() {
+  const ss = SpreadsheetApp.openById(CONFIG.SPREADSHEET_ID);
+  const sheet = ss.getSheetByName(CONFIG.ORDERS_SHEET);
+
+  if (!sheet || sheet.getLastColumn() === 0) return;
+
+  const headers = getHeaders_(sheet);
+  const lastRow = Math.max(sheet.getLastRow(), 2);
+
+  const dateCol = headers.indexOf('DateNeeded') + 1;
+  const createdCol = headers.indexOf('CreatedAt') + 1;
+  const importedCol = headers.indexOf('ImportedAt') + 1;
+  const updatedCol = headers.indexOf('LastUpdatedAt') + 1;
+
+  if (dateCol > 0) {
+    sheet.getRange(2, dateCol, lastRow - 1, 1)
+      .setNumberFormat(CONFIG.DATE_FORMAT);
+  }
+
+  [createdCol, importedCol, updatedCol].forEach(function (col) {
+    if (col > 0) {
+      sheet.getRange(2, col, lastRow - 1, 1)
+        .setNumberFormat(CONFIG.DATETIME_FORMAT);
+    }
+  });
+}
+
+
+function formatOrderRow_(sheet, rowNumber, headers) {
+  const dateCol = headers.indexOf('DateNeeded') + 1;
+  const createdCol = headers.indexOf('CreatedAt') + 1;
+  const importedCol = headers.indexOf('ImportedAt') + 1;
+  const updatedCol = headers.indexOf('LastUpdatedAt') + 1;
+
+  if (dateCol > 0) {
+    sheet.getRange(rowNumber, dateCol)
+      .setNumberFormat(CONFIG.DATE_FORMAT);
+  }
+
+  [createdCol, importedCol, updatedCol].forEach(function (col) {
+    if (col > 0) {
+      sheet.getRange(rowNumber, col)
+        .setNumberFormat(CONFIG.DATETIME_FORMAT);
+    }
+  });
+
+  const unitCol = headers.indexOf('UnitPrice') + 1;
+  const totalCol = headers.indexOf('EstimatedTotal') + 1;
+
+  if (unitCol > 0) {
+    sheet.getRange(rowNumber, unitCol).setNumberFormat('"RM" #,##0.00');
+  }
+
+  if (totalCol > 0) {
+    sheet.getRange(rowNumber, totalCol).setNumberFormat('"RM" #,##0.00');
+  }
+
+  // Teks biasa: kekalkan sifar depan WhatsApp dan elak formula injection.
+  TEXT_COLUMNS.forEach(function (name) {
+    const col = headers.indexOf(name) + 1;
+    if (col > 0) {
+      sheet.getRange(rowNumber, col).setNumberFormat('@');
+    }
+  });
+}
+
+
+/* =====================================================
+   SETTINGS HELPERS
+===================================================== */
+
+function getSettingsMap_() {
+  const ss = SpreadsheetApp.openById(CONFIG.SPREADSHEET_ID);
+  const sheet = ss.getSheetByName(CONFIG.SETTINGS_SHEET);
+
+  if (!sheet || sheet.getLastRow() < 2) return {};
+
+  const values = sheet.getDataRange().getValues();
+  const result = {};
+
+  for (let i = 1; i < values.length; i++) {
+    const key = String(values[i][0] || '').trim();
+    if (key) result[key] = values[i][1];
+  }
+
+  return result;
+}
+
+
+function setSettingValue_(key, value) {
+  const ss = SpreadsheetApp.openById(CONFIG.SPREADSHEET_ID);
+  const sheet = ss.getSheetByName(CONFIG.SETTINGS_SHEET);
+
+  if (!sheet) {
+    throw new Error('Tab Settings tidak ditemui.');
+  }
+
+  const lastRow = sheet.getLastRow();
+
+  if (lastRow >= 2) {
+    const keys = sheet.getRange(2, 1, lastRow - 1, 1).getValues();
+
+    for (let i = 0; i < keys.length; i++) {
+      if (String(keys[i][0]).trim() === key) {
+        sheet.getRange(i + 2, 2).setValue(value);
+        return;
+      }
+    }
+  }
+
+  const row = Math.max(2, lastRow + 1);
+  sheet.getRange(row, 1, 1, 2).setValues([[key, value]]);
+}
+
+
+function getHighestLeadNumber_(sheet, prefix) {
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) return 0;
+
+  const ids = sheet.getRange(2, 1, lastRow - 1, 1).getDisplayValues();
+  let highest = 0;
+
+  ids.forEach(function (row) {
+    const id = String(row[0] || '').trim();
+    const match = new RegExp(
+      '^' + escapeRegExp_(prefix) + '(\\d+)$'
+    ).exec(id);
+
+    if (match) {
+      highest = Math.max(highest, Number(match[1]));
+    }
+  });
+
+  return highest;
+}
+
+
+/* =====================================================
+   GENERAL HELPERS
+===================================================== */
+
+function getHeaders_(sheet) {
+  if (sheet.getLastColumn() === 0) return [];
+
+  return sheet.getRange(1, 1, 1, sheet.getLastColumn())
+    .getDisplayValues()[0]
+    .map(function (h) {
+      return String(h || '').trim();
+    });
+}
+
+
+function normalizeHeader_(value) {
+  return String(value || '')
+    .toLowerCase()
+    .replace(/[\s_\-]/g, '');
+}
+
+
+function findHeaderIndex_(normalizedHeaders, candidates) {
+  const normalizedCandidates = candidates.map(normalizeHeader_);
+
+  for (let i = 0; i < normalizedHeaders.length; i++) {
+    if (normalizedCandidates.indexOf(normalizedHeaders[i]) !== -1) {
+      return i;
+    }
+  }
+
+  return -1;
+}
+
+
+function escapeRegExp_(value) {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
