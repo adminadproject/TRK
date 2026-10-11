@@ -3,10 +3,10 @@
   var num = document.getElementById('shirtCount');
   if (!box || !num) return;
 
-  var KEY = 'ad_shirt_shown';
+  var KEY = 'ad_shirt_exact';
   var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  function fmt(n) { return n.toLocaleString('en-MY') + '+'; }
+  function fmt(n) { return n.toLocaleString('en-MY'); }
 
   function render(target, animate) {
     box.hidden = false;
@@ -29,8 +29,8 @@
   fetch(url + (url.indexOf('?') < 0 ? '?' : '&') + 'stats=1')
     .then(function (r) { return r.json(); })
     .then(function (d) {
-      var step = Math.max(1, Number(d.step) || 50);
-      var shown = Math.floor((Number(d.total) || 0) / step) * step;
+      // Nilai sebenar (tidak dibundarkan).
+      var shown = Math.floor(Number(d.total) || 0);
       if (shown <= 0) return; // jangan papar sifar
       try { localStorage.setItem(KEY, String(shown)); } catch (e) {}
       render(shown, shown !== cached);
