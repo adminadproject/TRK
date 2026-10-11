@@ -1,0 +1,21 @@
+{
+  "name": "AD Project Custom Teamwear",
+  "short_name": "AD Project",
+  "lang": "ms",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#111111",
+  "theme_color": "#facc15",
+  "icons": [
+    {
+      "src": "assets/img/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/img/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
