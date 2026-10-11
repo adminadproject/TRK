@@ -26,7 +26,7 @@
 <meta name="twitter:title" content="Tempah Baju Custom Online (Min. 10 Helai) | AD Project">
 <meta name="twitter:description" content="Isi borang tempahan baju custom AD Project dan dapatkan anggaran harga serta-merta. Roundneck, polo dan muslimah, minimum 10 helai.">
 <meta name="twitter:image" content="https://adproject.my/assets/img/og-image.jpg">
-<link rel="stylesheet" href="assets/css/style.css?v=923d6804">
+<link rel="stylesheet" href="assets/css/style.css?v=49972ff1">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Utama","item":"https://adproject.my/"},{"@type":"ListItem","position":2,"name":"Tempahan","item":"https://adproject.my/order.html"}]}</script>
 </head>
 <body class="page-order">
@@ -44,7 +44,7 @@
       <a href="gallery.html">GALLERY</a>
       <a href="promotion.html">PROMOTION</a>
       <a href="order.html" class="active" aria-current="page">ORDER</a>
-      <a href="affiliate-login.html" class="nav-outline">AFFILIATE LOGIN</a>
+      <a href="track-order.html" class="nav-outline">TRACK ORDER</a>
       <a href="contact.html">CONTACT US</a>
     </nav>
   </div>
@@ -134,14 +134,39 @@
         <section class="confirmation" id="confirmationPanel" aria-live="polite">
           <div class="confirmation-icon" id="confirmationIcon">✓</div>
           <h2 id="confirmationTitle">Tempahan berjaya dihantar!</h2>
-          <p id="confirmationMessage">Terima kasih. Maklumat tempahan anda telah diterima oleh AD Project. Pihak kami akan menyemak butiran tempahan anda.</p>
-          <p id="catalogPrompt"><strong>Mahukan katalog design percuma?</strong><br>Tekan butang di bawah untuk melihat katalog melalui Telegram.</p>
+          <p id="confirmationMessage">Terima kasih. Maklumat tempahan anda telah diterima oleh AD Project.</p>
+          <p id="orderNoLine" hidden>Nombor tempahan anda: <strong id="orderNoInline"></strong><br>Simpan nombor ini untuk <a href="track-order.html">semak status tempahan</a>.</p>
           <p id="failHelp" hidden><strong>Perlukan bantuan?</strong><br>Sila semak maklumat dan cuba semula, atau hubungi admin AD Project.</p>
-          <a class="telegram-btn" id="telegramBtn" href="https://t.me/bajusublimation_bot" target="_blank" rel="noopener noreferrer">✈ LIHAT KATALOG DI TELEGRAM</a>
-          <p class="confirmation-note" id="confirmationNote">Untuk pertanyaan harga diskaun, sila hubungi admin secara berasingan melalui saluran rasmi AD Project.</p>
+          <div class="btn-row" style="justify-content:center" id="confirmActions">
+            <a class="telegram-btn" href="https://t.me/bajusublimation_bot" target="_blank" rel="noopener noreferrer">✈ KATALOG DESIGN</a>
+            <a class="discount-btn discount-link" href="#" target="_blank" rel="noopener noreferrer">% LEBIH DISKAUN</a>
+          </div>
         </section>
       </section>
     </div>
+
+<div class="matrix-overlay" id="matrixOverlay" hidden aria-live="polite" role="status">
+  <canvas id="matrixRain" aria-hidden="true"></canvas>
+  <div class="matrix-term">
+    <div class="matrix-lines" id="matrixLines"></div>
+    <span class="matrix-cursor" aria-hidden="true">█</span>
+  </div>
+</div>
+
+<div class="modal" id="doneModal" data-wa="60126552627" hidden>
+  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="doneTitle">
+    <button type="button" class="modal-x" id="doneClose" aria-label="Tutup">&times;</button>
+    <div class="confirmation-icon">✓</div>
+    <h2 id="doneTitle">Tempahan berjaya dihantar!</h2>
+    <p>Terima kasih, <strong id="doneName"></strong>. Pasukan kami akan menghubungi anda melalui WhatsApp.</p>
+    <p class="order-no">No. tempahan: <strong id="doneOrderNo"></strong></p>
+    <div class="modal-actions">
+      <a class="telegram-btn" href="https://t.me/bajusublimation_bot" target="_blank" rel="noopener noreferrer">✈ KATALOG DESIGN</a>
+      <a class="discount-btn discount-link" href="#" target="_blank" rel="noopener noreferrer">% LEBIH DISKAUN</a>
+    </div>
+  </div>
+</div>
+
 <noscript><p class="container" style="text-align:center;padding-bottom:30px">Sila aktifkan JavaScript untuk melihat pengesahan tempahan, atau hubungi kami melalui WhatsApp.</p></noscript>
 
 </main>
@@ -150,7 +175,7 @@
     <div class="footer-brand">
       <img src="assets/img/logo-128.png" alt="" width="72" height="72" loading="lazy">
       <p><strong style="color:#fff">AD Project</strong><br>Custom Teamwear &amp; baju sublimation. Harga kilang untuk anda.</p>
-      <p>&copy; 2026 ADPROJECT ENTERPRISE</p>
+      <p>&copy; 2026 AD PROJECTS VENTURE</p>
     </div>
     <div>
       <h2>Menu</h2>
@@ -159,7 +184,7 @@
         <li><a href="gallery.html">GALLERY</a></li>
         <li><a href="promotion.html">PROMOTION</a></li>
         <li><a href="order.html" class="active" aria-current="page">ORDER</a></li>
-        <li><a href="affiliate-login.html" class="nav-outline">AFFILIATE LOGIN</a></li>
+        <li><a href="track-order.html" class="nav-outline">TRACK ORDER</a></li>
         <li><a href="contact.html">CONTACT US</a></li>
       </ul>
     </div>
@@ -175,7 +200,7 @@
       </address>
     </div>
   </div>
-  <div class="footer-bottom">Hak cipta terpelihara. ADPROJECT ENTERPRISE.</div>
+  <div class="footer-bottom">Hak cipta terpelihara. AD PROJECTS VENTURE.</div>
 </footer>
 
 <a class="wa-float" href="https://wa.me/60126552627?text=Hi%20AD%20Project%2C%20saya%20nak%20tanya%20tentang%20tempahan%20baju." target="_blank" rel="noopener noreferrer" aria-label="Hubungi kami melalui WhatsApp">
@@ -184,6 +209,6 @@
 </a>
 <script src="assets/js/main.js?v=deed6241" defer></script>
 <script type="application/json" id="tier-data">{"tiers": [{"min": 10, "max": 29, "base": 22, "label": "10–29 helai"}, {"min": 30, "max": 100, "base": 20, "label": "30–100 helai"}, {"min": 101, "max": 300, "base": 18, "label": "101–300 helai"}, {"min": 301, "max": 500, "base": 16, "label": "301–500 helai"}, {"min": 501, "max": 1000, "base": 15, "label": "501–1,000 helai"}, {"min": 1001, "max": null, "base": 13, "label": "1,001+ helai"}], "surcharge": {"ROUNDNECK": 0, "POLO": 2, "MUSLIMAH": 7}}</script>
-<script src="assets/js/order.js?v=87f6f124" defer></script>
+<script src="assets/js/order.js?v=c1d7217a" defer></script>
 </body>
 </html>
